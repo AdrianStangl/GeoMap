@@ -36,7 +36,7 @@ public class DBDemo {
 
 
     public static void main(String[] args) {
-        Connection connection=null;  
+        Connection connection = null;
 
 
         long time;

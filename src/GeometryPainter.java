@@ -37,7 +37,7 @@ public class GeometryPainter {
                 y[i]=511-(int)Math.round((coord.y-minY)*512/(maxY-minY));
             }
 
-            g.setColor(Color.RED);
+            g.setColor(color);
             g.drawPolygon(x,y,x.length);
 
             BufferedImage iconImage= ImageIO.read(new File("icons" +File.separator+icon+".png"));
@@ -48,7 +48,7 @@ public class GeometryPainter {
         }
         else if (geom instanceof MultiPolygon) {
             for (int i = 0; i < geom.getNumGeometries(); i++){
-                paintGeometry(g,geom.getGeometryN(i),name,icon);
+                paintGeometry(g,geom.getGeometryN(i),name,icon, Color.RED);
             }
         }
         else
