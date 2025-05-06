@@ -56,16 +56,16 @@ public class MapRenderer {
      */
     public void drawAreas(Connection conn) throws Exception {
         String sql =
-                "SELECT realname, ST_AsEWKB(geom) " +
+                "SELECT realname, ST_AsEWKB(geom :: geometry) " +
                         "FROM domain " +
-                        "WHERE geometry='A' AND ST_Within(geom, ST_GeomFromWKB(?,4326))";
+                        "WHERE geometry='A' AND ST_Within(geom :: geometry, ST_GeomFromWKB(?,4326))";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setBytes(1, new WKBWriter().write(target));
             try (ResultSet rs = ps.executeQuery()) {
                 WKBReader reader = new WKBReader();
                 while (rs.next()) {
-                    byte[] wkb = rs.getBytes(1);
-                    String name = rs.getString(2);
+                    String name = rs.getString(1);
+                    byte[] wkb = rs.getBytes(2);
                     Geometry geom = reader.read(wkb);
                     Path2D path = new Path2D.Double();
                     boolean first = true;
@@ -90,9 +90,9 @@ public class MapRenderer {
      */
     public void drawLines(Connection conn) throws Exception {
         String sql =
-                "SELECT ST_AsEWKB(geom), realname " +
+                "SELECT ST_AsEWKB(geom :: geometry), realname " +
                         "FROM domain " +
-                        "WHERE geometry='L' AND ST_Within(geom, ST_GeomFromWKB(?,4326))";
+                        "WHERE geometry='L' AND ST_Within(geom :: geometry, ST_GeomFromWKB(?,4326))";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setBytes(1, new WKBWriter().write(target));
             try (ResultSet rs = ps.executeQuery()) {
@@ -120,9 +120,9 @@ public class MapRenderer {
      */
     public void drawPoints(Connection conn) throws Exception {
         String sql =
-                "SELECT ST_AsEWKB(geom), realname " +
+                "SELECT ST_AsEWKB(geom :: geometry), realname " +
                         "FROM domain " +
-                        "WHERE geometry='P' AND ST_Within(geom, ST_GeomFromWKB(?,4326))";
+                        "WHERE geometry='P' AND ST_Within(geom :: geometry, ST_GeomFromWKB(?,4326))";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setBytes(1, new WKBWriter().write(target));
             try (ResultSet rs = ps.executeQuery()) {

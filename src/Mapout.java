@@ -49,7 +49,7 @@ public class Mapout {
                     pxWidth, pxHeight);
             renderer.drawAreas(connection);
             renderer.drawLines(connection);
-            renderer.drawPoints(connection);
+            // renderer.drawPoints(connection);
             renderer.saveImage(outputFile);
 
             System.out.println("Karte geschrieben nach " + outputFile);
