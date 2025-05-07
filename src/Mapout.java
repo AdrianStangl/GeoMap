@@ -52,6 +52,8 @@ public class Mapout {
             // renderer.drawPoints(connection);
             renderer.saveImage(outputFile);
 
+            fetcher.printDistinctLSIClassesWithDescription(connection);
+
             System.out.println("Karte geschrieben nach " + outputFile);
         }
         catch (Exception e) {

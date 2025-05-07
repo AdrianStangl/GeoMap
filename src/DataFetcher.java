@@ -1,10 +1,13 @@
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.WKBReader;
+import com.vividsolutions.jts.io.WKBWriter;
 
 /**
  * Liest aus PostGIS das Polygon des gewünschten Karten-Ausschnitts
@@ -78,5 +81,32 @@ public class DataFetcher {
     /** Liefert das Polygon, das du in deinen WHERE‑Klauseln benutzen kannst. */
     public Geometry getTargetSquare() {
         return targetSquare;
+    }
+
+    public void printDistinctLSIClassesWithDescription(Connection conn) throws Exception {
+        String sql =
+                "SELECT DISTINCT ON (d.lsiclass1) " +
+                        "    d.lsiclass1, d.realname, l.description, l.token " +
+                        "FROM domain d " +
+                        "JOIN lsiclasses l ON d.lsiclass1 = l.id " +
+                        "WHERE ST_Within(d.geom::geometry, ST_GeomFromWKB(?, 4326))" +
+                        "ORDER BY d.lsiclass1 ASC";
+
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBytes(1, new WKBWriter().write(targetSquare));
+            try (ResultSet rs = ps.executeQuery()) {
+                List<String> classes = new ArrayList<>();
+                System.out.println("Distinct LSI classes in area:");
+                while (rs.next()) {
+                    String lsiClass = rs.getString("lsiclass1");
+                    String realname = rs.getString("realname");
+                    String description = rs.getString("description");
+                    String token = rs.getString("token");
+                    classes.add(lsiClass);
+                    System.out.printf("- %s (%s): %s -> %s %n", lsiClass, realname, description, token);
+                }
+                System.out.println("Total distinct LSI classes: " + classes.size());
+            }
+        }
     }
 }

@@ -63,7 +63,9 @@ public class MapRenderer {
             ps.setBytes(1, new WKBWriter().write(target));
             try (ResultSet rs = ps.executeQuery()) {
                 WKBReader reader = new WKBReader();
+                int count = 0;
                 while (rs.next()) {
+                    count++;
                     String name = rs.getString(1);
                     byte[] wkb = rs.getBytes(2);
                     Geometry geom = reader.read(wkb);
@@ -81,6 +83,7 @@ public class MapRenderer {
                     g.setColor(borderColorFor(name));
                     g.draw(path);
                 }
+                System.out.println("there are " + count + " Polygons");
             }
         }
     }
@@ -97,7 +100,9 @@ public class MapRenderer {
             ps.setBytes(1, new WKBWriter().write(target));
             try (ResultSet rs = ps.executeQuery()) {
                 WKBReader reader = new WKBReader();
+                int count = 0;
                 while (rs.next()) {
+                    count++;
                     byte[] wkb = rs.getBytes(1);
                     String name = rs.getString(2);
                     Geometry geom = reader.read(wkb);
@@ -111,6 +116,7 @@ public class MapRenderer {
                     g.setColor(borderColorFor(name));
                     g.draw(path);
                 }
+                System.out.println("there are " + count + " Lines");
             }
         }
     }
