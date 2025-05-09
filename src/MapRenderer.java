@@ -51,9 +51,41 @@ public class MapRenderer {
         return height - (int) Math.round((lat - env.getMinY()) * scaleY);
     }
 
+    public void drawMap(Connection connection, DataFetcher fetcher) throws Exception {
+        drawAreas(connection);
+        drawLines(connection);
+        drawWater(fetcher.getWater(connection));
+        // renderer.drawPoints(connection);
+    }
+
+    public void drawPolygon(ResultSet rs, Color fillColor, Color borderColor) throws Exception{
+        WKBReader reader = new WKBReader();
+
+        String name = rs.getString(1);
+        byte[] wkb = rs.getBytes(2);
+        Geometry geom = reader.read(wkb);
+        Path2D path = new Path2D.Double();
+        boolean first = true;
+        for (Coordinate c : geom.getCoordinates()) {
+            int x = toPixelX(c.x);
+            int y = toPixelY(c.y);
+            if (first) { path.moveTo(x, y); first = false; }
+            else      path.lineTo(x, y);
+        }
+        path.closePath();
+        g.setColor(fillColor);
+        g.fill(path);
+        g.setColor(borderColor);
+        g.draw(path);
+    }
     /**
      * Zeichnet Flächenobjekte (geometry='A')
      */
+
+    public void drawWater(ResultSet rs) throws Exception{
+        drawPolygon(rs, Color.BLUE, Color.white);
+    }
+
     public void drawAreas(Connection conn) throws Exception {
         String sql =
                 "SELECT realname, ST_AsEWKB(geom :: geometry) " +
@@ -62,26 +94,10 @@ public class MapRenderer {
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setBytes(1, new WKBWriter().write(target));
             try (ResultSet rs = ps.executeQuery()) {
-                WKBReader reader = new WKBReader();
                 int count = 0;
                 while (rs.next()) {
                     count++;
-                    String name = rs.getString(1);
-                    byte[] wkb = rs.getBytes(2);
-                    Geometry geom = reader.read(wkb);
-                    Path2D path = new Path2D.Double();
-                    boolean first = true;
-                    for (Coordinate c : geom.getCoordinates()) {
-                        int x = toPixelX(c.x);
-                        int y = toPixelY(c.y);
-                        if (first) { path.moveTo(x, y); first = false; }
-                        else      path.lineTo(x, y);
-                    }
-                    path.closePath();
-                    g.setColor(fillColorFor(name));
-                    g.fill(path);
-                    g.setColor(borderColorFor(name));
-                    g.draw(path);
+                    drawPolygon(rs, fillColorFor("here goes the lsiClass"), borderColorFor("lsiclass as well") );
                 }
                 System.out.println("there are " + count + " Polygons");
             }

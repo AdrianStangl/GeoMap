@@ -8,6 +8,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKBWriter;
+import fu.keys.LSIClassCentreDB;
 
 /**
  * Liest aus PostGIS das Polygon des gewünschten Karten-Ausschnitts
@@ -29,7 +30,7 @@ public class DataFetcher {
                        double centerLat, double centerLon,
                        int pxWidth, int pxHeight,
                        double meterWidth) throws Exception {
-        this.targetSquare = fetchTargetSquare(conn,
+        this.targetSquare = calculateTargetSquare(conn,
                 centerLat, centerLon,
                 pxWidth, pxHeight,
                 meterWidth);
@@ -39,10 +40,10 @@ public class DataFetcher {
      * Führt die PostGIS-Abfrage durch, um ein WGS84-Polygon des Rechtecks
      * über Web‑Mercator zu bekommen.
      */
-    private static Geometry fetchTargetSquare(Connection conn,
-                                              double lat, double lon,
-                                              int wPx, int hPx,
-                                              double widthMeters) throws Exception {
+    private static Geometry calculateTargetSquare(Connection conn,
+                                                  double lat, double lon,
+                                                  int wPx, int hPx,
+                                                  double widthMeters) throws Exception {
         // Halbe Ausdehnung in Metern
         double halfW = widthMeters / 2.0;
         // Höhe in Metern
@@ -81,6 +82,25 @@ public class DataFetcher {
     /** Liefert das Polygon, das du in deinen WHERE‑Klauseln benutzen kannst. */
     public Geometry getTargetSquare() {
         return targetSquare;
+    }
+
+    public ResultSet getWater(Connection conn) throws Exception {
+        int[] lsiRangeWater= LSIClassCentreDB.lsiClassRange("WATER");
+        String sql =
+                "SELECT realname, " +
+                        "ST_AsEWKB(geom :: geometry)" +
+                "FROM domain " +
+                "WHERE ST_Within(geom :: geometry, ST_GeomFromWKB(?,4326))" +
+                        "AND lsiclass1 BETWEEN ? AND ?" +
+                        "AND geometry='A'";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setBytes(1, new WKBWriter().write(targetSquare));
+            ps.setInt(2, lsiRangeWater[0]);
+            ps.setInt(3, lsiRangeWater[1]);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs;
+            }
+        }
     }
 
     public void printDistinctLSIClassesWithDescription(Connection conn) throws Exception {

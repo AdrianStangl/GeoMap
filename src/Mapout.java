@@ -47,9 +47,7 @@ public class Mapout {
             MapRenderer renderer = new MapRenderer(connection,
                     fetcher.getTargetSquare(),
                     pxWidth, pxHeight);
-            renderer.drawAreas(connection);
-            renderer.drawLines(connection);
-            // renderer.drawPoints(connection);
+            renderer.drawMap(connection, fetcher);
             renderer.saveImage(outputFile);
 
             fetcher.printDistinctLSIClassesWithDescription(connection);
@@ -63,4 +61,5 @@ public class Mapout {
         }
 // …
     }
+
 }

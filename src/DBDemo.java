@@ -85,7 +85,14 @@ public class DBDemo {
             
             time=System.currentTimeMillis(); // Zeitmessung beginnen
 
-            PreparedStatement pstatement=connection.prepareStatement("SELECT realname, ST_AsEWKB(geom :: geometry) FROM domain WHERE (geometry='L' OR geometry='C') AND lsiclass1 BETWEEN ? AND ? AND ST_within(geom :: geometry,ST_GeomFromWKB(?,4326)) ORDER BY ST_Length(geom) DESC");
+            PreparedStatement pstatement=connection.prepareStatement(
+                    "SELECT realname," +
+                            " ST_AsEWKB(geom :: geometry) " +
+                        "FROM domain " +
+                        "WHERE (geometry='L' OR geometry='C') " +
+                            "AND lsiclass1 BETWEEN ? AND ? " +
+                            "AND ST_within(geom :: geometry,ST_GeomFromWKB(?,4326))" +
+                        "ORDER BY ST_Length(geom) DESC");
 
             int col=1;
             pstatement.setInt(col++,lcStrassen[0]);
