@@ -1,9 +1,8 @@
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
-import java.awt.Color;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -78,9 +77,19 @@ public class MapRenderer {
         g.setColor(borderColor);
         g.draw(path);
     }
-    /**
-     * Zeichnet Flächenobjekte (geometry='A')
-     */
+
+    public void drawLineGeometry(Geometry geom, Color borderColor) {
+        Path2D path = new Path2D.Double();
+        boolean first = true;
+        for (Coordinate c : geom.getCoordinates()) {
+            int x = toPixelX(c.x), y = toPixelY(c.y);
+            if (first) { path.moveTo(x,y); first = false; }
+            else      path.lineTo(x,y);
+        }
+        g.setStroke(new BasicStroke(3.0f));
+        g.setColor(borderColor);
+        g.draw(path);
+    }
 
     public void drawWater(List<DomainFeature> waterGeoms) throws Exception {
         Color fillColor = new Color(100, 149, 237, 180);  // Cornflower Blue, semi-transparent
@@ -90,10 +99,13 @@ public class MapRenderer {
             if(feature.geometryType().equals("A"))
                 drawPolygon(feature.geometry(), fillColor, borderColor);
             else
-                drawLines();
+                // drawLineGeometry(feature.geometry(), borderColor);
+                drawPolygon(feature.geometry().buffer(0.0001), fillColor, fillColor);
         }
     }
-
+    /**
+     * Zeichnet Flächenobjekte (geometry='A')
+     */
     public void drawAreas(Connection conn) throws Exception {
         String sql =
                 "SELECT lsiclass1, ST_AsEWKB(geom :: geometry) " +
