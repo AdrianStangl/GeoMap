@@ -84,23 +84,79 @@ public class DataFetcher {
         return targetSquare;
     }
 
-    public ResultSet getWater(Connection conn) throws Exception {
+    public List<Geometry> getWaterGeometries(Connection conn) throws Exception {
+        List<Geometry> geoms = new ArrayList<>();
         int[] lsiRangeWater= LSIClassCentreDB.lsiClassRange("WATER");
         String sql =
-                "SELECT realname, " +
-                        "ST_AsEWKB(geom :: geometry)" +
-                "FROM domain " +
-                "WHERE ST_Within(geom :: geometry, ST_GeomFromWKB(?,4326))" +
-                        "AND lsiclass1 BETWEEN ? AND ?" +
-                        "AND geometry='A'";
+                "SELECT ST_AsEWKB(geom :: geometry) " +
+                        "FROM domain " +
+                        "WHERE ST_Within(geom :: geometry, ST_GeomFromWKB(?,4326)) " +
+                        "  AND lsiclass1 BETWEEN ? AND ? " +
+                        "  AND geometry='A'";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setBytes(1, new WKBWriter().write(targetSquare));
             ps.setInt(2, lsiRangeWater[0]);
             ps.setInt(3, lsiRangeWater[1]);
             try (ResultSet rs = ps.executeQuery()) {
-                return rs;
+                WKBReader reader = new WKBReader();
+                while (rs.next()) {
+                    byte[] wkb = rs.getBytes(1);
+                    Geometry geom = reader.read(wkb);
+                    geoms.add(geom);
+                }
             }
         }
+        return geoms;
+    }
+
+    public List<DomainFeature> getFeaturesByLsiClass(Connection conn, String lsiClassGroup) throws Exception {
+        return getFeaturesByLsiClass(conn, lsiClassGroup, null);
+    }
+    public List<DomainFeature> getFeaturesByLsiClass(Connection conn, int lsiLower, int lsiUpper) throws Exception {
+        return getFeaturesByLsiClass(conn, lsiLower, lsiUpper, null);
+    }
+
+    public List<DomainFeature> getFeaturesByLsiClass(Connection conn, String lsiClassGroup, String geometryType) throws Exception {
+        int[] lsiRange = LSIClassCentreDB.lsiClassRange(lsiClassGroup);
+
+        return getFeaturesByLsiClass(conn, lsiRange[0], lsiRange[1], geometryType);
+    }
+
+    public List<DomainFeature> getFeaturesByLsiClass(Connection conn, int lsiLower, int lsiUpper, String geometryType) throws Exception {
+        List<DomainFeature> features = new ArrayList<>();
+
+        StringBuilder sql = new StringBuilder("""
+            SELECT realname, lsiclass1, ST_AsEWKB(geom :: geometry), geometry
+            FROM domain
+            WHERE ST_Within(geom :: geometry, ST_GeomFromWKB(?, 4326))
+              AND lsiclass1 BETWEEN ? AND ?
+        """);
+
+        if (geometryType != null) {
+            sql.append(" AND geometry = ?");
+        }
+
+        try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+            ps.setBytes(1, new WKBWriter().write(targetSquare));
+            ps.setInt(2, lsiLower);
+            ps.setInt(3, lsiUpper);
+            if (geometryType != null) {
+                ps.setString(4, geometryType);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                WKBReader reader = new WKBReader();
+                while (rs.next()) {
+                    String realname = rs.getString("realname");
+                    int lsiclass = rs.getInt("lsiclass1");
+                    Geometry geom = reader.read(rs.getBytes(3));
+                    String geometryDataType = rs.getString("geometry");
+                    features.add(new DomainFeature(realname, lsiclass, geom, geometryDataType));
+                }
+            }
+        }
+
+        return features;
     }
 
     public void printDistinctLSIClassesWithDescription(Connection conn) throws Exception {

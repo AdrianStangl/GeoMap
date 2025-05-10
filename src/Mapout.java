@@ -59,7 +59,6 @@ public class Mapout {
             e.printStackTrace();
             System.exit(1);
         }
-// …
     }
 
 }

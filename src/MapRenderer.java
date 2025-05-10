@@ -7,6 +7,7 @@ import java.awt.Color;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.List;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -54,23 +55,22 @@ public class MapRenderer {
     public void drawMap(Connection connection, DataFetcher fetcher) throws Exception {
         drawAreas(connection);
         drawLines(connection);
-        drawWater(fetcher.getWater(connection));
+        drawWater(fetcher.getFeaturesByLsiClass(connection, "WATER"));
         // renderer.drawPoints(connection);
     }
 
-    public void drawPolygon(ResultSet rs, Color fillColor, Color borderColor) throws Exception{
-        WKBReader reader = new WKBReader();
-
-        String name = rs.getString(1);
-        byte[] wkb = rs.getBytes(2);
-        Geometry geom = reader.read(wkb);
+    public void drawPolygon(Geometry geom, Color fillColor, Color borderColor) {
         Path2D path = new Path2D.Double();
         boolean first = true;
         for (Coordinate c : geom.getCoordinates()) {
             int x = toPixelX(c.x);
             int y = toPixelY(c.y);
-            if (first) { path.moveTo(x, y); first = false; }
-            else      path.lineTo(x, y);
+            if (first) {
+                path.moveTo(x, y);
+                first = false;
+            } else {
+                path.lineTo(x, y);
+            }
         }
         path.closePath();
         g.setColor(fillColor);
@@ -82,27 +82,44 @@ public class MapRenderer {
      * Zeichnet Flächenobjekte (geometry='A')
      */
 
-    public void drawWater(ResultSet rs) throws Exception{
-        drawPolygon(rs, Color.BLUE, Color.white);
+    public void drawWater(List<DomainFeature> waterGeoms) throws Exception {
+        Color fillColor = new Color(100, 149, 237, 180);  // Cornflower Blue, semi-transparent
+        Color borderColor = new Color(30, 30, 150, 200);  // Darker blue
+
+        for (DomainFeature feature : waterGeoms) {
+            if(feature.geometryType().equals("A"))
+                drawPolygon(feature.geometry(), fillColor, borderColor);
+            else
+                drawLines();
+        }
     }
 
     public void drawAreas(Connection conn) throws Exception {
         String sql =
-                "SELECT realname, ST_AsEWKB(geom :: geometry) " +
+                "SELECT lsiclass1, ST_AsEWKB(geom :: geometry) " +
                         "FROM domain " +
                         "WHERE geometry='A' AND ST_Within(geom :: geometry, ST_GeomFromWKB(?,4326))";
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setBytes(1, new WKBWriter().write(target));
             try (ResultSet rs = ps.executeQuery()) {
                 int count = 0;
+                WKBReader reader = new WKBReader();
                 while (rs.next()) {
                     count++;
-                    drawPolygon(rs, fillColorFor("here goes the lsiClass"), borderColorFor("lsiclass as well") );
+                    int lsiClass = rs.getInt("lsiclass1");
+                    byte[] wkb = rs.getBytes(2);
+                    Geometry geom = reader.read(wkb);
+
+                    Color fill = fillColorFor(lsiClass);
+                    Color border = borderColorFor(lsiClass);
+
+                    drawPolygon(geom, fill, border);
                 }
-                System.out.println("there are " + count + " Polygons");
+                System.out.println("There are " + count + " polygons");
             }
         }
     }
+
 
     /**
      * Zeichnet Linienobjekte (geometry='L')
@@ -164,10 +181,17 @@ public class MapRenderer {
         }
     }
 
-    private Color fillColorFor(String name) {
+    private Color fillColorFor(int lsiClass) {
         return new Color(200, 200, 200, 180);
     }
-    private Color borderColorFor(String name) {
+    private Color borderColorFor(int lsiClass) {
+        return Color.DARK_GRAY;
+    }
+
+    private Color fillColorFor(String lsiClassName) {
+        return new Color(200, 200, 200, 180);
+    }
+    private Color borderColorFor(String lsiClassName) {
         return Color.DARK_GRAY;
     }
 
