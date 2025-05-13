@@ -117,12 +117,20 @@ public class DataFetcher {
     }
 
     public List<DomainFeature> getFeaturesByLsiClass(Connection conn, String lsiClassGroup, String geometryType) throws Exception {
-        int[] lsiRange = LSIClassCentreDB.lsiClassRange(lsiClassGroup);
-
-        return getFeaturesByLsiClass(conn, lsiRange[0], lsiRange[1], geometryType);
+        return getFeaturesByLsiClass(conn, lsiClassGroup, geometryType, false);
     }
 
-    public List<DomainFeature> getFeaturesByLsiClass(Connection conn, int lsiLower, int lsiUpper, String geometryType) throws Exception {
+    public List<DomainFeature> getFeaturesByLsiClass(Connection conn, String lsiClassGroup, String geometryType, boolean excludeHistoric) throws Exception {
+        int[] lsiRange = LSIClassCentreDB.lsiClassRange(lsiClassGroup);
+
+        return getFeaturesByLsiClass(conn, lsiRange[0], lsiRange[1], geometryType, excludeHistoric);
+    }
+
+    public List<DomainFeature> getFeaturesByLsiClass(Connection conn, int lsiLower, int lsiUpper, String geometryType) throws Exception{
+        return getFeaturesByLsiClass(conn, lsiLower, lsiUpper, geometryType, false);
+    }
+
+    public List<DomainFeature> getFeaturesByLsiClass(Connection conn, int lsiLower, int lsiUpper, String geometryType, boolean excludeHistoric) throws Exception {
         List<DomainFeature> features = new ArrayList<>();
 
         StringBuilder sql = new StringBuilder("""
@@ -130,18 +138,30 @@ public class DataFetcher {
             FROM domain
             WHERE ST_Within(geom :: geometry, ST_GeomFromWKB(?, 4326))
               AND lsiclass1 BETWEEN ? AND ?
+              -- AND basetype != 'R'
         """);
 
         if (geometryType != null) {
             sql.append(" AND geometry = ?");
         }
 
+        if (excludeHistoric){
+            System.out.println("i dont like old things");
+            sql.append(" AND lsiclass2 not BETWEEN ? AND ?");
+        }
+
+        int parameterIndex = 1;
         try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
-            ps.setBytes(1, new WKBWriter().write(targetSquare));
-            ps.setInt(2, lsiLower);
-            ps.setInt(3, lsiUpper);
+            ps.setBytes(parameterIndex++, new WKBWriter().write(targetSquare));
+            ps.setInt(parameterIndex++, lsiLower);
+            ps.setInt(parameterIndex++, lsiUpper);
             if (geometryType != null) {
-                ps.setString(4, geometryType);
+                ps.setString(parameterIndex++, geometryType);
+            }
+            if (excludeHistoric) {
+                int[] historicLsiRange = LSIClassCentreDB.lsiClassRange("HISTORIC");
+                ps.setInt(parameterIndex++, historicLsiRange[0]);
+                ps.setInt(parameterIndex++, historicLsiRange[1]);
             }
 
             try (ResultSet rs = ps.executeQuery()) {

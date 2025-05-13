@@ -54,7 +54,12 @@ public class MapRenderer {
     public void drawMap(Connection connection, DataFetcher fetcher) throws Exception {
         drawAreas(connection);
         drawLines(connection);
-        drawWater(fetcher.getFeaturesByLsiClass(connection, "WATER"));
+        drawWater(fetcher.getFeaturesByLsiClass(connection, "WATER", null, true));
+        drawVegetation(fetcher.getFeaturesByLsiClass(connection, "VEGETATION", null, true));
+        drawVegetation(fetcher.getFeaturesByLsiClass(connection, "PARK", null, true));
+        drawCommercial(fetcher.getFeaturesByLsiClass(connection, "COMMERCIAL", null, true));
+        drawResidential(fetcher.getFeaturesByLsiClass(connection, "INHABITED", null, true));
+        drawStreets(fetcher.getFeaturesByLsiClass(connection, "STRASSEN_WEGE"));
         // renderer.drawPoints(connection);
     }
 
@@ -86,7 +91,7 @@ public class MapRenderer {
             if (first) { path.moveTo(x,y); first = false; }
             else      path.lineTo(x,y);
         }
-        g.setStroke(new BasicStroke(3.0f));
+        // g.setStroke(new BasicStroke(3.0f));
         g.setColor(borderColor);
         g.draw(path);
     }
@@ -96,6 +101,8 @@ public class MapRenderer {
         Color borderColor = new Color(30, 30, 150, 200);  // Darker blue
 
         for (DomainFeature feature : waterGeoms) {
+            if (feature.realname().contains("Graben"))
+                System.out.println(feature.realname());
             if(feature.geometryType().equals("A"))
                 drawPolygon(feature.geometry(), fillColor, borderColor);
             else
@@ -103,6 +110,59 @@ public class MapRenderer {
                 drawPolygon(feature.geometry().buffer(0.0001), fillColor, fillColor);
         }
     }
+
+    public void drawVegetation(List<DomainFeature> vegetationGeoms) throws Exception {
+        Color fillColor = new Color(42, 195, 20, 236);  // Cornflower Blue, semi-transparent
+        Color borderColor = new Color(39, 181, 21, 236);  // Darker blue
+
+        for (DomainFeature feature : vegetationGeoms) {
+            if(feature.geometryType().equals("A"))
+                drawPolygon(feature.geometry(), fillColor, borderColor);
+            else
+                // drawLineGeometry(feature.geometry(), borderColor);
+                drawPolygon(feature.geometry().buffer(0.0001), fillColor, fillColor);
+        }
+    }
+
+    public void drawCommercial(List<DomainFeature> vegetationGeoms) throws Exception {
+        Color fillColor = new Color(223, 9, 74, 213);  // Cornflower Blue, semi-transparent
+        Color borderColor = new Color(172, 12, 50, 236);  // Darker blue
+
+        for (DomainFeature feature : vegetationGeoms) {
+            if(feature.geometryType().equals("A"))
+                drawPolygon(feature.geometry(), fillColor, borderColor);
+            else
+                // drawLineGeometry(feature.geometry(), borderColor);
+                drawPolygon(feature.geometry().buffer(0.0001), fillColor, fillColor);
+        }
+    }
+
+    public void drawResidential(List<DomainFeature> vegetationGeoms) throws Exception {
+        Color fillColor = new Color(149, 6, 49, 213);  // Cornflower Blue, semi-transparent
+        Color borderColor = new Color(94, 3, 23, 236);  // Darker blue
+
+        for (DomainFeature feature : vegetationGeoms) {
+            if(feature.geometryType().equals("A"))
+                drawPolygon(feature.geometry(), fillColor, borderColor);
+            else
+                // drawLineGeometry(feature.geometry(), borderColor);
+                drawPolygon(feature.geometry().buffer(0.0001), fillColor, fillColor);
+        }
+    }
+
+    public void drawStreets(List<DomainFeature> vegetationGeoms) throws Exception {
+        Color fillColor = new Color(151, 94, 108, 213);  // Cornflower Blue, semi-transparent
+        Color borderColor = new Color(142, 121, 126, 236);  // Darker blue
+
+        for (DomainFeature feature : vegetationGeoms) {
+            if(feature.geometryType().equals("A"))
+                drawPolygon(feature.geometry(), fillColor, borderColor);
+            else
+                drawLineGeometry(feature.geometry(), borderColor);
+                // drawPolygon(feature.geometry(), fillColor, fillColor);
+        }
+    }
+
     /**
      * Zeichnet Flächenobjekte (geometry='A')
      */
