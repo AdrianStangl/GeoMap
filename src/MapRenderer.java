@@ -8,9 +8,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.*;
+import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKBWriter;
 
@@ -54,12 +53,14 @@ public class MapRenderer {
     public void drawMap(Connection connection, DataFetcher fetcher) throws Exception {
         drawAreas(connection);
         drawLines(connection);
-        drawWater(fetcher.getFeaturesByLsiClass(connection, "WATER", null, true));
-        drawVegetation(fetcher.getFeaturesByLsiClass(connection, "VEGETATION", null, true));
-        drawVegetation(fetcher.getFeaturesByLsiClass(connection, "PARK", null, true));
-        drawCommercial(fetcher.getFeaturesByLsiClass(connection, "COMMERCIAL", null, true));
-        drawResidential(fetcher.getFeaturesByLsiClass(connection, "INHABITED", null, true));
-        drawStreets(fetcher.getFeaturesByLsiClass(connection, "STRASSEN_WEGE"));
+        drawWater(connection, fetcher);
+        drawWater(connection, fetcher);
+        drawVegetation(connection, fetcher);
+        drawVegetation(connection, fetcher);
+        drawCommercial(connection, fetcher);
+        drawResidential(connection, fetcher);
+        drawStreets(connection, fetcher);
+        //markStuff(fetcher.getFeaturesByLsiClass(connection, "UNDEF"));
         // renderer.drawPoints(connection);
     }
 
@@ -96,22 +97,33 @@ public class MapRenderer {
         g.draw(path);
     }
 
-    public void drawWater(List<DomainFeature> waterGeoms) throws Exception {
+    public void drawWater(Connection connection, DataFetcher fetcher) throws Exception {
+        List<DomainFeature> waterGeoms = fetcher.getFeaturesByLsiClass(connection, "WATER", null, false);
+        List<DomainFeature> otherWater = fetcher.getFeaturesByLsiClass(connection, "WASSER_LAND_FORMATION", null, false);
+        waterGeoms.addAll(otherWater);
+
         Color fillColor = new Color(100, 149, 237, 180);  // Cornflower Blue, semi-transparent
         Color borderColor = new Color(30, 30, 150, 200);  // Darker blue
 
         for (DomainFeature feature : waterGeoms) {
-            if (feature.realname().contains("Graben"))
-                System.out.println(feature.realname());
-            if(feature.geometryType().equals("A"))
+            if(feature.geometry() instanceof Polygon)
                 drawPolygon(feature.geometry(), fillColor, borderColor);
+            else if(feature.geometry() instanceof MultiPolygon)
+                for (int i = 0; i < feature.geometry().getNumGeometries(); i++) {
+                    drawPolygon(feature.geometry().getGeometryN(i), fillColor, borderColor);
+                }
             else
                 // drawLineGeometry(feature.geometry(), borderColor);
-                drawPolygon(feature.geometry().buffer(0.0001), fillColor, fillColor);
+                drawPolygon(feature.geometry().buffer(0.00009), fillColor, fillColor);
+                //continue;
         }
     }
 
-    public void drawVegetation(List<DomainFeature> vegetationGeoms) throws Exception {
+    public void drawVegetation(Connection connection, DataFetcher fetcher) throws Exception {
+        List<DomainFeature> vegetationGeoms = fetcher.getFeaturesByLsiClass(connection, "VEGETATION", null, false);
+        List<DomainFeature> otherVegetation = fetcher.getFeaturesByLsiClass(connection, "PARK", null, false);
+        vegetationGeoms.addAll(otherVegetation);
+
         Color fillColor = new Color(42, 195, 20, 236);  // Cornflower Blue, semi-transparent
         Color borderColor = new Color(39, 181, 21, 236);  // Darker blue
 
@@ -124,11 +136,12 @@ public class MapRenderer {
         }
     }
 
-    public void drawCommercial(List<DomainFeature> vegetationGeoms) throws Exception {
+    public void drawCommercial(Connection connection, DataFetcher fetcher) throws Exception {
+        List<DomainFeature> commercialGeoms = fetcher.getFeaturesByLsiClass(connection, "COMMERCIAL", null, false);
         Color fillColor = new Color(223, 9, 74, 213);  // Cornflower Blue, semi-transparent
         Color borderColor = new Color(172, 12, 50, 236);  // Darker blue
 
-        for (DomainFeature feature : vegetationGeoms) {
+        for (DomainFeature feature : commercialGeoms) {
             if(feature.geometryType().equals("A"))
                 drawPolygon(feature.geometry(), fillColor, borderColor);
             else
@@ -137,24 +150,44 @@ public class MapRenderer {
         }
     }
 
-    public void drawResidential(List<DomainFeature> vegetationGeoms) throws Exception {
+    public void drawResidential(Connection connection, DataFetcher fetcher) throws Exception {
+        List<DomainFeature> residentialGeoms = fetcher.getFeaturesByLsiClass(connection, "INHABITED", null, false);
         Color fillColor = new Color(149, 6, 49, 213);  // Cornflower Blue, semi-transparent
         Color borderColor = new Color(94, 3, 23, 236);  // Darker blue
 
-        for (DomainFeature feature : vegetationGeoms) {
+        for (DomainFeature feature : residentialGeoms) {
             if(feature.geometryType().equals("A"))
                 drawPolygon(feature.geometry(), fillColor, borderColor);
             else
                 // drawLineGeometry(feature.geometry(), borderColor);
-                drawPolygon(feature.geometry().buffer(0.0001), fillColor, fillColor);
+                drawPolygon(feature.geometry(), fillColor, fillColor);
         }
     }
 
-    public void drawStreets(List<DomainFeature> vegetationGeoms) throws Exception {
+    public void markStuff(List<DomainFeature> stuff) throws Exception {
+        Color fillColor = new Color(229, 26, 236, 255);  // Cornflower Blue, semi-transparent
+        Color borderColor = new Color(255, 0, 234, 255);  // Darker blue
+
+        for (DomainFeature feature : stuff) {
+            if(feature.geometry() instanceof Polygon)
+                drawPolygon(feature.geometry(), fillColor, borderColor);
+            else if(feature.geometry() instanceof MultiPolygon)
+                for (int i = 0; i < feature.geometry().getNumGeometries(); i++) {
+                    drawPolygon(feature.geometry().getGeometryN(i), fillColor, borderColor);
+                }
+            else
+                // drawLineGeometry(feature.geometry(), borderColor);
+                drawPolygon(feature.geometry().buffer(0.00005), fillColor, fillColor);
+            //continue;
+        }
+    }
+
+    public void drawStreets(Connection connection, DataFetcher fetcher) throws Exception {
+        List<DomainFeature> streetGeoms = fetcher.getFeaturesByLsiClass(connection, "STRASSEN_WEGE");
         Color fillColor = new Color(151, 94, 108, 213);  // Cornflower Blue, semi-transparent
         Color borderColor = new Color(142, 121, 126, 236);  // Darker blue
 
-        for (DomainFeature feature : vegetationGeoms) {
+        for (DomainFeature feature : streetGeoms) {
             if(feature.geometryType().equals("A"))
                 drawPolygon(feature.geometry(), fillColor, borderColor);
             else

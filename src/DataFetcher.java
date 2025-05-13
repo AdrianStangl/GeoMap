@@ -84,31 +84,6 @@ public class DataFetcher {
         return targetSquare;
     }
 
-    public List<Geometry> getWaterGeometries(Connection conn) throws Exception {
-        List<Geometry> geoms = new ArrayList<>();
-        int[] lsiRangeWater= LSIClassCentreDB.lsiClassRange("WATER");
-        String sql =
-                "SELECT ST_AsEWKB(geom :: geometry) " +
-                        "FROM domain " +
-                        "WHERE ST_Within(geom :: geometry, ST_GeomFromWKB(?,4326)) " +
-                        "  AND lsiclass1 BETWEEN ? AND ? " +
-                        "  AND geometry='A'";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setBytes(1, new WKBWriter().write(targetSquare));
-            ps.setInt(2, lsiRangeWater[0]);
-            ps.setInt(3, lsiRangeWater[1]);
-            try (ResultSet rs = ps.executeQuery()) {
-                WKBReader reader = new WKBReader();
-                while (rs.next()) {
-                    byte[] wkb = rs.getBytes(1);
-                    Geometry geom = reader.read(wkb);
-                    geoms.add(geom);
-                }
-            }
-        }
-        return geoms;
-    }
-
     public List<DomainFeature> getFeaturesByLsiClass(Connection conn, String lsiClassGroup) throws Exception {
         return getFeaturesByLsiClass(conn, lsiClassGroup, null);
     }
@@ -137,8 +112,8 @@ public class DataFetcher {
             SELECT realname, lsiclass1, ST_AsEWKB(geom :: geometry), geometry
             FROM domain
             WHERE ST_Within(geom :: geometry, ST_GeomFromWKB(?, 4326))
-              AND lsiclass1 BETWEEN ? AND ?
-              -- AND basetype != 'R'
+              AND (lsiclass1 BETWEEN ? AND ? or lsiclass2 BETWEEN ? AND ? or lsiclass3 BETWEEN ? AND ?)
+            ORDER BY ST_Area(geom :: geometry) DESC
         """);
 
         if (geometryType != null) {
@@ -153,6 +128,10 @@ public class DataFetcher {
         int parameterIndex = 1;
         try (PreparedStatement ps = conn.prepareStatement(sql.toString())) {
             ps.setBytes(parameterIndex++, new WKBWriter().write(targetSquare));
+            ps.setInt(parameterIndex++, lsiLower);
+            ps.setInt(parameterIndex++, lsiUpper);
+            ps.setInt(parameterIndex++, lsiLower);
+            ps.setInt(parameterIndex++, lsiUpper);
             ps.setInt(parameterIndex++, lsiLower);
             ps.setInt(parameterIndex++, lsiUpper);
             if (geometryType != null) {
