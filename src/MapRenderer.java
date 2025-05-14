@@ -54,12 +54,13 @@ public class MapRenderer {
         drawAreas(connection);
         drawLines(connection);
         drawWater(connection, fetcher);
-        drawWater(connection, fetcher);
-        drawVegetation(connection, fetcher);
         drawVegetation(connection, fetcher);
         drawCommercial(connection, fetcher);
         drawResidential(connection, fetcher);
         drawStreets(connection, fetcher);
+        drawOpenarea(connection, fetcher);
+        drawGeology(connection, fetcher);
+        drawOthers(connection, fetcher);
         //markStuff(fetcher.getFeaturesByLsiClass(connection, "UNDEF"));
         // renderer.drawPoints(connection);
     }
@@ -145,8 +146,8 @@ public class MapRenderer {
             if(feature.geometryType().equals("A"))
                 drawPolygon(feature.geometry(), fillColor, borderColor);
             else
-                // drawLineGeometry(feature.geometry(), borderColor);
-                drawPolygon(feature.geometry().buffer(0.0001), fillColor, fillColor);
+                drawLineGeometry(feature.geometry(), borderColor);
+                // drawPolygon(feature.geometry().buffer(0.0001), fillColor, fillColor);
         }
     }
 
@@ -159,10 +160,56 @@ public class MapRenderer {
             if(feature.geometryType().equals("A"))
                 drawPolygon(feature.geometry(), fillColor, borderColor);
             else
-                // drawLineGeometry(feature.geometry(), borderColor);
-                drawPolygon(feature.geometry(), fillColor, fillColor);
+                drawLineGeometry(feature.geometry(), borderColor);
+                //drawPolygon(feature.geometry(), fillColor, fillColor);
         }
     }
+
+    public void drawOpenarea(Connection connection, DataFetcher fetcher) throws Exception {
+        List<DomainFeature> openareaGeoms = fetcher.getFeaturesByLsiClass(connection, "OPENAREA", null, false);
+        Color fillColor = new Color(239, 221, 18, 213);  // Cornflower Blue, semi-transparent
+        Color borderColor = new Color(236, 220, 50, 236);  // Darker blue
+
+        for (DomainFeature feature : openareaGeoms) {
+            if(feature.geometry() instanceof Polygon)
+                drawPolygon(feature.geometry(), fillColor, borderColor);
+            else if(feature.geometry() instanceof MultiPolygon)
+                for (int i = 0; i < feature.geometry().getNumGeometries(); i++) {
+                    drawPolygon(feature.geometry().getGeometryN(i), fillColor, borderColor);
+                }
+            else
+                drawLineGeometry(feature.geometry(), borderColor);
+                //drawPolygon(feature.geometry(), fillColor, fillColor);
+        }
+    }
+    public void drawGeology(Connection connection, DataFetcher fetcher) throws Exception {
+        List<DomainFeature> openareaGeoms = fetcher.getFeaturesByLsiClass(connection, "GEOLOGY", null, false);
+        Color fillColor = new Color(95, 103, 112, 213);  // Cornflower Blue, semi-transparent
+        Color borderColor = new Color(92, 91, 77, 236);  // Darker blue
+
+        for (DomainFeature feature : openareaGeoms) {
+            if(feature.geometryType().equals("A"))
+                drawPolygon(feature.geometry(), fillColor, borderColor);
+            else
+                drawLineGeometry(feature.geometry(), borderColor);
+                // drawPolygon(feature.geometry(), fillColor, fillColor);
+        }
+    }
+
+    public void drawOthers(Connection connection, DataFetcher fetcher) throws Exception {
+        List<DomainFeature> openareaGeoms = fetcher.getFeaturesByLsiClass(connection, "OTHER_OBJECTS", null, false);
+        Color fillColor = new Color(174, 88, 211, 213);  // Cornflower Blue, semi-transparent
+        Color borderColor = new Color(200, 95, 239, 236);  // Darker blue
+
+        for (DomainFeature feature : openareaGeoms) {
+            if(feature.geometryType().equals("A"))
+                drawPolygon(feature.geometry(), fillColor, borderColor);
+            else
+                drawLineGeometry(feature.geometry(), borderColor);
+                //drawPolygon(feature.geometry(), fillColor, fillColor);
+        }
+    }
+
 
     public void markStuff(List<DomainFeature> stuff) throws Exception {
         Color fillColor = new Color(229, 26, 236, 255);  // Cornflower Blue, semi-transparent

@@ -107,6 +107,7 @@ public class DataFetcher {
 
     public List<DomainFeature> getFeaturesByLsiClass(Connection conn, int lsiLower, int lsiUpper, String geometryType, boolean excludeHistoric) throws Exception {
         List<DomainFeature> features = new ArrayList<>();
+        System.out.println("Fetching from " + lsiLower + " to " + lsiUpper);
 
         StringBuilder sql = new StringBuilder("""
             SELECT realname, lsiclass1, ST_AsEWKB(geom :: geometry), geometry
