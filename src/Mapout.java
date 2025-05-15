@@ -50,7 +50,7 @@ public class Mapout {
             renderer.drawMap(connection, fetcher);
             renderer.saveImage(outputFile);
 
-            fetcher.printDistinctLSIClassesWithDescription(connection);
+            // fetcher.printDistinctLSIClassesWithDescription(connection);
 
             System.out.println("Karte geschrieben nach " + outputFile);
         }
