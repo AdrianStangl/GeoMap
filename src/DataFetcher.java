@@ -112,7 +112,7 @@ public class DataFetcher {
         StringBuilder sql = new StringBuilder("""
             SELECT realname, lsiclass1, ST_AsEWKB(geom :: geometry), geometry, ST_Area(geom :: geometry), tags
             FROM domain
-            WHERE ST_Within(geom :: geometry, ST_GeomFromWKB(?, 4326))
+            WHERE ST_Intersects(geom :: geometry, ST_GeomFromWKB(?, 4326))
               AND (lsiclass1 BETWEEN ? AND ? or lsiclass2 BETWEEN ? AND ? or lsiclass3 BETWEEN ? AND ?)
             ORDER BY ST_Area(geom :: geometry) DESC
         """);
