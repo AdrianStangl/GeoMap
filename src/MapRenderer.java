@@ -148,7 +148,7 @@ public class MapRenderer {
     public void drawCommercial(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> commercialGeoms = fetcher.getFeaturesByLsiClass(connection, "COMMERCIAL", null, false);
         Color fillColor = new Color(207, 73, 114, 180);  // Cornflower Blue, semi-transparent
-        Color borderColor = new Color(172, 12, 50, 236);  // Darker blue
+        Color borderColor = new Color(159, 11, 46, 236);  // Darker blue
 
         int count = 0;
         for (DomainFeature feature : commercialGeoms) {
@@ -164,7 +164,7 @@ public class MapRenderer {
     public void drawResidential(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> residentialGeoms = fetcher.getFeaturesByLsiClass(connection, "INHABITED", null, false);
         Color fillColor = new Color(149, 6, 49, 180);  // Cornflower Blue, semi-transparent
-        Color borderColor = new Color(94, 3, 23, 236);  // Darker blue
+        Color borderColor = new Color(87, 2, 21, 236);  // Darker blue
 
         int count = 0;
         for (DomainFeature feature : residentialGeoms) {
@@ -218,10 +218,10 @@ public class MapRenderer {
             addDomainFeatureToGlobalList(feature, haltestelleFillColor, haltestelleFillColor, 0.00001);
         }
 
-        // Extract and draw tram tracks
-        Color parkFillColor = new Color(3, 119, 3, 255);
+
+        Color parkFillColor = new Color(4, 151, 4, 255);
         int[] parkLsiBoundaries = LSIClassCentreDB.lsiClassRange("GENERAL_PUBLIC_PLACE");
-        List<DomainFeature> parkGeos = extractLSISubSet(tracks, parkLsiBoundaries[0], parkLsiBoundaries[1]);
+        List<DomainFeature> parkGeos = extractLSISubSet(openareaGeoms, parkLsiBoundaries[0], parkLsiBoundaries[1]);
         for (DomainFeature feature : parkGeos) {
             addDomainFeatureToGlobalList(feature, parkFillColor, parkFillColor, 0.00001);
         }
@@ -288,13 +288,10 @@ public class MapRenderer {
         Color fillColor = new Color(97, 91, 91, 255);  // Cornflower Blue, semi-transparent
         Color borderColor = new Color(43, 40, 40, 236);  // Darker blue
 
-        Color fillColorInnerStreets = new Color(97, 91, 91, 255);
-        Color borderColorInnerStreets = new Color(97, 91, 91, 255);
-
         int[] streetSubBoundaries = LSIClassCentreDB.lsiClassRange("INNERORTSTRASSE_ALL");
         List<DomainFeature> innerCityStreets = extractLSISubSet(streetGeoms, streetSubBoundaries[0], streetSubBoundaries[1]);
 
-        drawStreetsFromDomainFeatures(innerCityStreets, fillColorInnerStreets, borderColorInnerStreets, 0.00004, 0.000026 );
+        drawStreetsFromDomainFeatures(innerCityStreets, fillColor, borderColor, 0.00004, 0.000026 );
 
         // draw remaning street geos
         drawStreetsFromDomainFeatures(streetGeoms, fillColor, borderColor, 0.000045, 0.00003);
