@@ -39,26 +39,31 @@ public class Mapout {
         System.out.println("MeterWidth: "+meterWidth);
 
         try {
-            DataFetcher fetcher = new DataFetcher(connection,
-                    centerLat, centerLon,
-                    pxWidth, pxHeight,
-                    meterWidth);
-            // Karte rendern
-            MapRenderer renderer = new MapRenderer(connection,
-                    fetcher.getTargetSquare(),
-                    pxWidth, pxHeight);
-            renderer.drawMap(connection, fetcher);
-            renderer.saveImage(outputFile);
-
-            // fetcher.printDistinctLSIClassesWithDescription(connection);
-
-            System.out.println("Karte geschrieben nach " + outputFile);
+            drawMapForParameters(connection, centerLat, centerLon, pxWidth, pxHeight, meterWidth, outputFile);
+            drawMapForParameters(connection, 49.445555, 11.082587, 1024, 512, 1234.5, "examplePrompt.png");
         }
         catch (Exception e) {
             System.out.println("Error processing DB queries: "+e.toString());
             e.printStackTrace();
             System.exit(1);
         }
+    }
+
+    private static void drawMapForParameters(Connection connection, double centerLat, double centerLon, int pxWidth, int pxHeight, double meterWidth, String outputFile) throws Exception {
+        DataFetcher fetcher = new DataFetcher(connection,
+                centerLat, centerLon,
+                pxWidth, pxHeight,
+                meterWidth);
+        // Karte rendern
+        MapRenderer renderer = new MapRenderer(connection,
+                fetcher.getTargetSquare(),
+                pxWidth, pxHeight);
+        renderer.drawMap(connection, fetcher);
+        renderer.saveImage(outputFile);
+
+        // fetcher.printDistinctLSIClassesWithDescription(connection);
+
+        System.out.println("Karte geschrieben nach " + outputFile);
     }
 
 }
