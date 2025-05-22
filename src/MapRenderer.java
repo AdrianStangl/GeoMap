@@ -149,7 +149,7 @@ public class MapRenderer {
         List<DomainFeature> commercialGeoms = fetcher.getFeaturesByLsiClass(connection, "COMMERCIAL", null, false);
         Color fillColor = new Color(207, 73, 114, 180);  // Cornflower Blue, semi-transparent
         Color borderColor = new Color(159, 11, 46, 236);  // Darker blue
-        
+
         for (DomainFeature feature : commercialGeoms) {
             addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0);
         }
@@ -241,20 +241,11 @@ public class MapRenderer {
 
         // Extract and draw tram tracks
         Color cityWallFillColor = new Color(204, 59, 27, 255);
-        int[] cityWallLsiBoundaries = LSIClassCentreDB.lsiClassRange("STADTMAUER");
-        List<DomainFeature> historicGeos = extractLSISubSet(otherGeoms, cityWallLsiBoundaries[0], cityWallLsiBoundaries[1]);
-        int[] turmLsiBoundaries = LSIClassCentreDB.lsiClassRange("TURM");
-        List<DomainFeature> turmGeos = extractLSISubSet(otherGeoms, turmLsiBoundaries[0], turmLsiBoundaries[1]);
-        historicGeos.addAll(turmGeos);
-        for (DomainFeature feature : historicGeos) {
-            addDomainFeatureToGlobalList(feature, cityWallFillColor, cityWallFillColor, 0.00001);
-        }
+        drawFeatureSubSet(otherGeoms, "STADTMAUER", cityWallFillColor, cityWallFillColor, 0.00001);
+        drawFeatureSubSet(otherGeoms, "TURM", cityWallFillColor, cityWallFillColor, 0.00001);
+        
         Color waterProtectAreaFillColor = new Color(39, 134, 227, 242);
-        int[] waterProtectAreaBoundaries = LSIClassCentreDB.lsiClassRange("SCHUTZGEBIET");
-        List<DomainFeature> waterProtectAreaGeos = extractLSISubSet(otherGeoms, waterProtectAreaBoundaries[0], waterProtectAreaBoundaries[1]);
-        for (DomainFeature feature : waterProtectAreaGeos) {
-            addDomainFeatureToGlobalList(feature, waterProtectAreaFillColor, waterProtectAreaFillColor, 0);
-        }
+        drawFeatureSubSet(otherGeoms, "SCHUTZGEBIET", waterProtectAreaFillColor, waterProtectAreaFillColor, 0);
 
         Color fillColor = new Color(233, 0, 255, 255);
         Color borderColor = new Color(200, 95, 239, 236);
