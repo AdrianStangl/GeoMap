@@ -243,7 +243,7 @@ public class MapRenderer {
         Color cityWallFillColor = new Color(204, 59, 27, 255);
         drawFeatureSubSet(otherGeoms, "STADTMAUER", cityWallFillColor, cityWallFillColor, 0.00001);
         drawFeatureSubSet(otherGeoms, "TURM", cityWallFillColor, cityWallFillColor, 0.00001);
-        
+
         Color waterProtectAreaFillColor = new Color(39, 134, 227, 242);
         drawFeatureSubSet(otherGeoms, "SCHUTZGEBIET", waterProtectAreaFillColor, waterProtectAreaFillColor, 0);
 
@@ -295,8 +295,8 @@ public class MapRenderer {
                     byte[] wkb = rs.getBytes(2);
                     Geometry geom = reader.read(wkb);
 
-                    Color fill = fillColorFor(lsiClass);
-                    Color border = borderColorFor(lsiClass);
+                    Color fill = new Color(200, 200, 200, 180);
+                    Color border = Color.darkGray;
 
                     drawPolygon(geom, fill, border);
                 }
@@ -364,7 +364,7 @@ public class MapRenderer {
                         if (first) { path.moveTo(x,y); first = false; }
                         else      path.lineTo(x,y);
                     }
-                    g.setColor(borderColorFor(name));
+                    g.setColor(Color.DARK_GRAY);
                     g.draw(path);
                 }
                 System.out.println("there are " + count + " Lines");
@@ -409,20 +409,6 @@ public class MapRenderer {
                 }
             }
         }
-    }
-
-    private Color fillColorFor(int lsiClass) {
-        return new Color(200, 200, 200, 180);
-    }
-    private Color borderColorFor(int lsiClass) {
-        return Color.DARK_GRAY;
-    }
-
-    private Color fillColorFor(String lsiClassName) {
-        return new Color(200, 200, 200, 180);
-    }
-    private Color borderColorFor(String lsiClassName) {
-        return Color.DARK_GRAY;
     }
 
     /**
