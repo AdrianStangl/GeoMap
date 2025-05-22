@@ -60,7 +60,7 @@ public class MapRenderer {
 
     public void drawMap(Connection connection, DataFetcher fetcher) throws Exception {
         drawBackground();
-        drawAreas(connection);
+        // drawAreas(connection);
         // drawLines(connection);
         drawWater(connection, fetcher);
         drawGeology(connection, fetcher);
@@ -149,14 +149,8 @@ public class MapRenderer {
         List<DomainFeature> commercialGeoms = fetcher.getFeaturesByLsiClass(connection, "COMMERCIAL", null, false);
         Color fillColor = new Color(207, 73, 114, 180);  // Cornflower Blue, semi-transparent
         Color borderColor = new Color(159, 11, 46, 236);  // Darker blue
-
-        int count = 0;
+        
         for (DomainFeature feature : commercialGeoms) {
-            if(count < 10){
-                count++;
-                System.out.println("Drawing the commercial building: " + feature.realname() + " with size: " + feature.area());
-
-            }
             addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0);
         }
     }
@@ -166,21 +160,13 @@ public class MapRenderer {
         Color fillColor = new Color(149, 6, 49, 180);  // Cornflower Blue, semi-transparent
         Color borderColor = new Color(87, 2, 21, 236);  // Darker blue
 
-        int count = 0;
         for (DomainFeature feature : residentialGeoms) {
-            if(count < 10){
-                count++;
-                System.out.println("Drawing the building: " + feature.realname() + " with size: " + feature.area());
-            }
             addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0);
         }
     }
 
     public void drawOpenarea(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> openareaGeoms = fetcher.getFeaturesByLsiClass(connection, "OPENAREA", null, false);
-        Color fillColor = new Color(239, 221, 18, 255);  // Cornflower Blue, semi-transparent
-        Color borderColor = new Color(236, 220, 50, 236);  // Darker blue
-
         // Extract and draw streets
         int[] strassenLSIBoundaries = LSIClassCentreDB.lsiClassRange("STRASSEN_WEGE");
         List<DomainFeature> strassenGeos = extractLSISubSet(openareaGeoms, strassenLSIBoundaries[0], strassenLSIBoundaries[1]);
@@ -188,43 +174,30 @@ public class MapRenderer {
 
         // Extract and draw Parking spaces
         Color parkingSpaceColor = new Color(92, 79, 79, 255);
-        int[] parkingLSIBoundaries = LSIClassCentreDB.lsiClassRange("RUHENDER_VERKEHR");
-        List<DomainFeature> parkingGeos = extractLSISubSet(openareaGeoms, parkingLSIBoundaries[0], parkingLSIBoundaries[1]);
-        for (DomainFeature feature : parkingGeos) {
-            addDomainFeatureToGlobalList(feature, parkingSpaceColor, parkingSpaceColor, 0);
-        }
+        drawFeatureSubSet(openareaGeoms, "RUHENDER_VERKEHR", parkingSpaceColor, parkingSpaceColor, 0.00001);
 
         // Extract and draw tracks
-        Color TrackFillColor = new Color(43, 37, 37, 255);
-        int[] tracksLsiBoundaries = LSIClassCentreDB.lsiClassRange("GLEISKOERPER");
-        List<DomainFeature> tracks = extractLSISubSet(openareaGeoms, tracksLsiBoundaries[0], tracksLsiBoundaries[1]);
-        for (DomainFeature feature : tracks) {
-            addDomainFeatureToGlobalList(feature, TrackFillColor, TrackFillColor, 0.00001);
-        }
+        Color trackFillColor = new Color(43, 37, 37, 255);
+        drawFeatureSubSet(openareaGeoms, "GLEISKOERPER", trackFillColor, trackFillColor, 0.00001);
 
         // Extract and draw tram tracks
         Color tramFillColor = new Color(21, 20, 20, 255);
-        int[] tramLsiBoundaries = LSIClassCentreDB.lsiClassRange("TRAM_GLEISE");
-        List<DomainFeature> tramGeos = extractLSISubSet(tracks, tramLsiBoundaries[0], tramLsiBoundaries[1]);
-        for (DomainFeature feature : tramGeos) {
-            addDomainFeatureToGlobalList(feature, tramFillColor, tramFillColor, 0.00001);
-        }
+        drawFeatureSubSet(openareaGeoms, "TRAM_GLEISE", tramFillColor, tramFillColor, 0.00001);
 
         // Extract and draw tracks
         Color haltestelleFillColor = new Color(168, 134, 134, 255);
-        int[] haltestelleLsiBoundaries = LSIClassCentreDB.lsiClassRange("HALTESTELLE");
-        List<DomainFeature> haltestellen = extractLSISubSet(openareaGeoms, haltestelleLsiBoundaries[0], haltestelleLsiBoundaries[1]);
-        for (DomainFeature feature : haltestellen) {
-            addDomainFeatureToGlobalList(feature, haltestelleFillColor, haltestelleFillColor, 0.00001);
-        }
-
+        drawFeatureSubSet(openareaGeoms, "HALTESTELLE", haltestelleFillColor, haltestelleFillColor, 0.00001);
 
         Color parkFillColor = new Color(4, 151, 4, 255);
-        int[] parkLsiBoundaries = LSIClassCentreDB.lsiClassRange("GENERAL_PUBLIC_PLACE");
-        List<DomainFeature> parkGeos = extractLSISubSet(openareaGeoms, parkLsiBoundaries[0], parkLsiBoundaries[1]);
-        for (DomainFeature feature : parkGeos) {
-            addDomainFeatureToGlobalList(feature, parkFillColor, parkFillColor, 0.00001);
-        }
+        drawFeatureSubSet(openareaGeoms, "GENERAL_PUBLIC_PLACE", parkFillColor, parkFillColor, 0.00001);
+
+        // Extract and draw tram tracks
+        Color trainStationFillColor = new Color(119, 118, 118, 255);
+        drawFeatureSubSet(openareaGeoms, "BAHNVERKEHR", trainStationFillColor, trainStationFillColor, 0.00001);
+
+        // Extract and draw tram tracks
+        Color trafficOtherFillColor = new Color(89, 84, 84, 255);
+        drawFeatureSubSet(openareaGeoms, "TRAFFIC_PLACE", trafficOtherFillColor, trafficOtherFillColor, 0.00001);
 
         // Extract and draw streets
         // TODO Brücken nicht entfernen -> Upper bound anpassen
@@ -234,10 +207,25 @@ public class MapRenderer {
         trash = extractLSISubSet(openareaGeoms, trashLSIBoundaries[0], trashLSIBoundaries[1]);
 
         // draw the remaining open areas
+        Color fillColor = new Color(239, 221, 18, 255);  // Cornflower Blue, semi-transparent
+        Color borderColor = new Color(236, 220, 50, 236);  // Darker blue
         for (DomainFeature feature : openareaGeoms) {
             addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0);
         }
     }
+
+    private void drawFeatureSubSet(List<DomainFeature> featureSet, String lsiClassName, Color fillColor, Color borderColor, double buffer){
+        int[] lsiBoundaries = LSIClassCentreDB.lsiClassRange(lsiClassName);
+        drawFeatureSubSet(featureSet, lsiBoundaries[0], lsiBoundaries[1], fillColor, borderColor, buffer);
+    }
+
+    private void drawFeatureSubSet(List<DomainFeature> featureSet, int lowerLSIUpper, int upperLSIBorder, Color fillColor, Color borderColor, double buffer) {
+        List<DomainFeature> subsetGeos = extractLSISubSet(featureSet, lowerLSIUpper, upperLSIBorder);
+        for (DomainFeature feature : subsetGeos) {
+            addDomainFeatureToGlobalList(feature, fillColor, borderColor, buffer);
+        }
+    }
+
     public void drawGeology(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> openareaGeoms = fetcher.getFeaturesByLsiClass(connection, "GEOLOGY", null, false);
         Color fillColor = new Color(95, 103, 112, 255);  // Cornflower Blue, semi-transparent
@@ -352,11 +340,11 @@ public class MapRenderer {
 
     /// Draws a thick line of border color and a thinner liner of fillColor
     private void drawStreetsFromDomainFeatures(List<DomainFeature> features, Color fillColor, Color borderColor, double outerBuffer, double innerBuffer) {
+//        for (DomainFeature feature : features) {
+//            addDomainFeatureToGlobalList(feature, borderColor, borderColor, outerBuffer);
+//        }
         for (DomainFeature feature : features) {
-            addDomainFeatureToGlobalList(feature, borderColor, borderColor, outerBuffer);
-        }
-        for (DomainFeature feature : features) {
-            addDomainFeatureToGlobalList(feature, fillColor, fillColor, innerBuffer);
+            addDomainFeatureToGlobalList(feature, fillColor, borderColor, innerBuffer);
         }
     }
 
