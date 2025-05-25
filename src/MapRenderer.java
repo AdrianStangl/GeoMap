@@ -160,6 +160,49 @@ public class MapRenderer {
         Color fillColor = new Color(149, 6, 49, 180);  // Cornflower Blue, semi-transparent
         Color borderColor = new Color(87, 2, 21, 236);  // Darker blue
 
+        String[] residentialLSIClasses = {
+                // Residential
+                "GEWAECHSHAUS", "UNTERSTAND", "HUT",
+                "SHED", "BARN_BUILDING", "FARM_BUILDING",
+                "SCHOOL_BUILDING", "COMMERCIAL_BUILDING", "INDUSTRIAL_BUILDING",
+                "DETACHED", "TERRACE", "APPARTEMENTS",
+                "GARAGES", "GARAGE", "CARPORT",
+                "HOUSE", "RESIDENTIAL_BUILDING", "BUILDING",
+                "RESIDENTIAL",
+
+                // Academic
+                "ASTRONOMIE", "RESEARCH", "LIBRARY",
+                "BESONDERE_SCHULE", "BERUFSSCHULE", "GRUNDSCHULE",
+                "HAUPTSCHULE", "REALSCHULE", "GYMNASIUM",
+                "UNIVERSITY", "ACADEMIC",
+
+                "MELDUNGSEINRICHTUNGEN",
+                "ROHRLEITUNG",
+
+                // Wasseraufbereitung
+                "KLAERWERK", "WASSERTURM", "WASSERHOCHBEHAELTER",
+                "STAUDAMM", "RESERVOIR", "BASIN",
+                "BRUNNEN", "WASSERWERK", "WASSERAUFBEREITUNG",
+
+                // Power plant addon
+                "TRANSFORMATOR", "TRAFOHAUS", "STROMVERTEILER",
+                "STROMLEITUNG", "STROMMAST", "WASSERRAD",
+                "UMSPANNSTATION", "POWER_PLANT_ADDON",
+                // Power plants
+                "MUEHLE", "WASSER_KRAFTWERK", "SOLAR_KRAFTWERK",
+                "WINDMUEHLE", "WINDKRAFTWERK", "BRENN_POWER_PLANT",
+                "KOHLE_KRAFTWERK", "OEL_KRAFTWERK", "GAS_KRAFTWERK",
+                "POWER_PLANT",
+                // Remaining industrial stuff
+                "MINING", "INDUSTRIAL"
+
+        };
+
+        for (String lsiClassName : residentialLSIClasses){
+            drawFeatureSubSet(residentialGeoms, lsiClassName, fillColor, borderColor, 0.00001);
+        }
+
+
         for (DomainFeature feature : residentialGeoms) {
             addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0);
         }
@@ -216,7 +259,12 @@ public class MapRenderer {
 
     private void drawFeatureSubSet(List<DomainFeature> featureSet, String lsiClassName, Color fillColor, Color borderColor, double buffer){
         int[] lsiBoundaries = LSIClassCentreDB.lsiClassRange(lsiClassName);
-        drawFeatureSubSet(featureSet, lsiBoundaries[0], lsiBoundaries[1], fillColor, borderColor, buffer);
+        LsiColorMap.ColorPair colorPair = LsiColorMap.getColor(lsiClassName);
+        if (colorPair.fill().equals(new Color(200, 200, 200, 180))){
+            System.out.println("Use default fill color for class: " + lsiClassName);
+            drawFeatureSubSet(featureSet, lsiBoundaries[0], lsiBoundaries[1], fillColor, borderColor, buffer);
+        } else
+            drawFeatureSubSet(featureSet, lsiBoundaries[0], lsiBoundaries[1], colorPair.fill(), colorPair.stroke(), buffer);
     }
 
     private void drawFeatureSubSet(List<DomainFeature> featureSet, int lowerLSIUpper, int upperLSIBorder, Color fillColor, Color borderColor, double buffer) {

@@ -167,7 +167,7 @@ public class DataFetcher {
                         "    d.lsiclass1, d.realname, l.description, l.token " +
                         "FROM domain d " +
                         "JOIN lsiclasses l ON d.lsiclass1 = l.id " +
-                        "WHERE ST_Within(d.geom::geometry, ST_GeomFromWKB(?, 4326))" +
+                        "WHERE ST_Intersects(d.geom::geometry, ST_GeomFromWKB(?, 4326))" +
                         "ORDER BY d.lsiclass1 ASC";
 
         try (PreparedStatement ps = conn.prepareStatement(sql)) {
