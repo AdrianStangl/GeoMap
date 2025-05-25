@@ -121,7 +121,7 @@ public class MapRenderer {
     public void drawWater(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> waterGeoms = fetcher.getFeaturesByLsiClass(connection, "WATER", null, false);
         List<DomainFeature> otherWater = fetcher.getFeaturesByLsiClass(connection, "WASSER_LAND_FORMATION", null, false);
-        waterGeoms.addAll(otherWater);
+        //waterGeoms.addAll(otherWater);  // TODO check waterland class
 
         Color fillColor = new Color(39, 134, 227, 242);  // Cornflower Blue, semi-transparent
         Color borderColor = new Color(30, 30, 150, 255);  // Darker blue
@@ -241,11 +241,24 @@ public class MapRenderer {
 
         // Extract and draw tram tracks
         Color cityWallFillColor = new Color(204, 59, 27, 255);
-        drawFeatureSubSet(otherGeoms, "STADTMAUER", cityWallFillColor, cityWallFillColor, 0.00001);
-        drawFeatureSubSet(otherGeoms, "TURM", cityWallFillColor, cityWallFillColor, 0.00001);
+        Color cityWallBorderColor = new Color(147, 42, 19, 255);
+        drawFeatureSubSet(otherGeoms, "STADTMAUER", cityWallFillColor, cityWallBorderColor, 0.00001);
+        drawFeatureSubSet(otherGeoms, "TURM", cityWallFillColor, cityWallBorderColor, 0.00001);
 
         Color waterProtectAreaFillColor = new Color(39, 134, 227, 242);
         drawFeatureSubSet(otherGeoms, "SCHUTZGEBIET", waterProtectAreaFillColor, waterProtectAreaFillColor, 0);
+
+        Color begrenzungColor = new Color(66, 58, 57, 255);
+        drawFeatureSubSet(otherGeoms, "BEGRENZUNG", begrenzungColor, begrenzungColor, 0.00001);
+
+        Color historicColor = new Color(182, 53, 39, 255);
+        Color historicBorderColor = new Color(145, 44, 30, 255);
+        drawFeatureSubSet(otherGeoms, "HISTORIC", historicColor, historicBorderColor, 0.00001);
+
+        Color specialBuildingColor = new Color(113, 27, 20, 255);
+        Color specialBuildingBorderColor = new Color(69, 17, 10, 255);
+        drawFeatureSubSet(otherGeoms, "BUILDINGS_SPECIAL_USAGE", specialBuildingColor, specialBuildingBorderColor, 0.00001);
+
 
         Color fillColor = new Color(233, 0, 255, 255);
         Color borderColor = new Color(200, 95, 239, 236);
@@ -329,6 +342,7 @@ public class MapRenderer {
         drawableFeatures.add(new DrawableFeature(feature,fillColor,borderColor, buffer));
     }
 
+    // TODO Check if still need this method or merge with other subset draw
     /// Draws a thick line of border color and a thinner liner of fillColor
     private void drawStreetsFromDomainFeatures(List<DomainFeature> features, Color fillColor, Color borderColor, double outerBuffer, double innerBuffer) {
 //        for (DomainFeature feature : features) {
