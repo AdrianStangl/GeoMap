@@ -19,7 +19,7 @@ public class LsiColorMap {
         colorMap.put("HOUSE",               new ColorPair(new Color(173, 216, 230, 180), new Color(70, 130, 180, 200)));
         colorMap.put("DETACHED",            new ColorPair(new Color(176, 224, 230, 180), new Color(95, 158, 160, 200)));
         colorMap.put("TERRACE",             new ColorPair(new Color(221, 160, 221, 180), new Color(138, 43, 226, 200)));
-        colorMap.put("APPARTEMENTS",        new ColorPair(new Color(215, 160, 216, 180), new Color(186, 85, 211, 200)));
+        colorMap.put("APPARTEMENTS",        new ColorPair(new Color(215, 191, 216, 180), new Color(186, 85, 211, 200)));
         colorMap.put("GARAGES",             new ColorPair(new Color(255, 222, 173, 180), new Color(210, 105, 30, 200)));
         colorMap.put("GARAGE",              new ColorPair(new Color(255, 218, 185, 180), new Color(244, 164, 96, 200)));
         colorMap.put("CARPORT",             new ColorPair(new Color(240, 230, 140, 180), new Color(189, 183, 107, 200)));
@@ -89,6 +89,57 @@ public class LsiColorMap {
         // ◼ Übriges Industrie
         colorMap.put("MINING",              new ColorPair(new Color(205, 133,  63, 180), new Color(160,  82,  45, 200)));
         colorMap.put("INDUSTRIAL",          new ColorPair(new Color(176, 196, 222, 180), new Color(119, 136, 153, 200)));
+
+        // Gastronomy
+        colorMap.put("GASTRONOMY", new ColorPair(new Color(255, 239, 213, 180), new Color(222, 184, 135, 200))); // warm vanilla/biscuit
+
+        // Shops
+        colorMap.put("SHOP_MORE",                   new ColorPair(new Color(240, 255, 240, 180), new Color(144, 238, 144, 200))); // mint green
+        colorMap.put("LESEN_SCHREIBEN",             new ColorPair(new Color(224, 255, 255, 180), new Color(175, 238, 238, 200))); // soft blue
+        colorMap.put("BAUEN_EINRICHTEN_GARTEN",     new ColorPair(new Color(240, 255, 240, 180), new Color(152, 251, 152, 200))); // garden green
+        colorMap.put("ELEKTRONIKSHOP",              new ColorPair(new Color(230, 230, 250, 180), new Color(138,  43, 226, 200))); // electric violet
+        colorMap.put("SPORT_FREIZEIT_SHOP",         new ColorPair(new Color(255, 250, 205, 180), new Color(238, 232, 170, 200))); // light gold
+        colorMap.put("KLEIDUNG",                    new ColorPair(new Color(255, 228, 225, 180), new Color(219, 112, 147, 200))); // rose/pink
+        colorMap.put("KOERPERPFLEGE",               new ColorPair(new Color(255, 240, 245, 180), new Color(255, 182, 193, 200))); // light blush
+        colorMap.put("LEBENSMITTEL",                new ColorPair(new Color(250, 250, 210, 180), new Color(238, 232, 170, 200))); // soft yellow
+        colorMap.put("SHOP",                        new ColorPair(new Color(245, 245, 245, 180), new Color(192, 192, 192, 200))); // generic grey
+
+        // Handwerk
+        colorMap.put("HANDWERK", new ColorPair(new Color(222, 184, 135, 180), new Color(160,  82,  45, 200))); // wood/brown
+
+        // Services
+        colorMap.put("DIENSTLEISTUNG_AUTO",         new ColorPair(new Color(211, 211, 211, 180), new Color(169, 169, 169, 200))); // tech grey
+        colorMap.put("FINANZEINRICHTUNG",           new ColorPair(new Color(245, 255, 250, 180), new Color(144, 238, 144, 200))); // mint for money
+        colorMap.put("POST",                        new ColorPair(new Color(255, 250, 205, 180), new Color(218, 165,  32, 200))); // yellow postal tone
+        colorMap.put("COMMUNICATION",              new ColorPair(new Color(224, 255, 255, 180), new Color(176, 224, 230, 200))); // light blue
+        colorMap.put("TOILETS",                     new ColorPair(new Color(240, 248, 255, 180), new Color(175, 238, 238, 200))); // hygienic cyan
+        colorMap.put("UNTERHALTUNG_KOMMERZIELL",    new ColorPair(new Color(255, 228, 196, 180), new Color(244, 164,  96, 200))); // orange-beige
+        colorMap.put("NACHTLEBEN",                  new ColorPair(new Color(138,  43, 226, 180), new Color( 72,  61, 139, 200))); // nightlife purple
+        colorMap.put("WEITERE_DIENSTLEISTUNGEN",    new ColorPair(new Color(240, 255, 240, 180), new Color(211, 211, 211, 200))); // pale green/grey
+        colorMap.put("UEBERNACHTUNGEN",             new ColorPair(new Color(255, 239, 213, 180), new Color(210, 180, 140, 200))); // warm/soft beige
+
+        // Behörden
+        colorMap.put("BEHOERDE", new ColorPair(new Color(245, 245, 245, 180), new Color(190, 190, 190, 200))); // neutral grey-white
+
+        // Medical
+        colorMap.put("KRANKENHAUS", new ColorPair(new Color(224, 255, 255, 180), new Color(135, 206, 250, 200))); // clean blue
+        colorMap.put("APOTHEKE",    new ColorPair(new Color(255, 228, 225, 180), new Color(240, 128, 128, 200))); // soft red
+        colorMap.put("ARZTPRAXIS",  new ColorPair(new Color(255, 250, 250, 180), new Color(220, 220, 220, 200))); // clean white/grey
+        colorMap.put("MEDICAL",     new ColorPair(new Color(230, 255, 255, 180), new Color(176, 224, 230, 200))); // cyan blue
+
+        // Religion & Social
+        colorMap.put("SOCIAL_RELIGIOES", new ColorPair(new Color(255, 248, 220, 180), new Color(210, 180, 140, 200))); // creamy spiritual
+
+        // Freizeit
+        colorMap.put("UNTERHALTUNGSGEBAEUDE", new ColorPair(new Color(255, 240, 245, 180), new Color(255, 182, 193, 200))); // fun pink
+        colorMap.put("TIERPARK",              new ColorPair(new Color(204, 255, 204, 180), new Color(152, 251, 152, 200))); // animal green
+        colorMap.put("FREIZEIT",              new ColorPair(new Color(255, 228, 225, 180), new Color(255, 160, 122, 200))); // coral fun
+
+        // Ländlich
+        colorMap.put("LAENDLICH", new ColorPair(new Color(240, 255, 240, 180), new Color(189, 183, 107, 200))); // field green
+
+        // Catch-all commercial
+        colorMap.put("COMMERCIAL", new ColorPair(new Color(245, 245, 220, 180), new Color(200, 200, 180, 200))); // soft beige-grey
 
 
 

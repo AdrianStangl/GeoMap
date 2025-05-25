@@ -194,8 +194,36 @@ public class MapRenderer {
                 "KOHLE_KRAFTWERK", "OEL_KRAFTWERK", "GAS_KRAFTWERK",
                 "POWER_PLANT",
                 // Remaining industrial stuff
-                "MINING", "INDUSTRIAL"
+                "MINING", "INDUSTRIAL",
 
+                // Commercial
+                // Every gastronomie
+                "GASTRONOMY",
+                // Every shop
+                "SHOP_MORE", "LESEN_SCHREIBEN", "BAUEN_EINRICHTEN_GARTEN",
+                "ELEKTRONIKSHOP", "SPORT_FREIZEIT_SHOP", "KLEIDUNG",
+                "KOERPERPFLEGE", "LEBENSMITTEL",
+                "SHOP",
+                // Every Handwerk
+                "HANDWERK",
+                // Sonstige  commercial ober kategorien
+                "DIENSTLEISTUNG_AUTO", "FINANZEINRICHTUNG" , "POST",
+                "COMMUNICATION", "TOILETS", "UNTERHALTUNG_KOMMERZIELL",
+                "NACHTLEBEN", "WEITERE_DIENSTLEISTUNGEN", "UEBERNACHTUNGEN",
+
+                "BEHOERDE",
+                // Medical
+                "KRANKENHAUS", "APOTHEKE", "ARZTPRAXIS",
+                "MEDICAL",
+
+                "SOCIAL_RELIGIOES",
+                // Freizeit
+                "UNTERHALTUNGSGEBAEUDE", "TIERPARK" , "FREIZEIT",
+                // Laendlich
+                "LAENDLICH",
+
+                // Remaining non listed commercial things
+                "COMMERCIAL"
         };
 
         for (String lsiClassName : residentialLSIClasses){
