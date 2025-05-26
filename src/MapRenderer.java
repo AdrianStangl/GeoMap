@@ -123,12 +123,18 @@ public class MapRenderer {
         List<DomainFeature> otherWater = fetcher.getFeaturesByLsiClass(connection, "WASSER_LAND_FORMATION", null, false);
         //waterGeoms.addAll(otherWater);  // TODO check waterland class
 
-        Color fillColor = new Color(39, 134, 227, 242);  // Cornflower Blue, semi-transparent
-        Color borderColor = new Color(30, 30, 150, 255);  // Darker blue
+        LsiColorMap.ColorPair colorPair = LsiColorMap.getColor("WATER");
+        Color fillColor = colorPair.fill();
+        Color borderColor = colorPair.stroke();
 
         for (DomainFeature feature : waterGeoms) {
             if(!feature.tags().contains("tunnel"))
-                addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0.0001);
+                if(feature.tags().toLowerCase().contains("stream")){
+                    addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0.00003);
+                    System.out.println("bach found " + feature.realname());
+                }
+                else
+                    addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0.0001);
         }
     }
 
@@ -157,8 +163,8 @@ public class MapRenderer {
 
     public void drawResidential(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> residentialGeoms = fetcher.getFeaturesByLsiClass(connection, "INHABITED", null, false);
-        Color fillColor = new Color(149, 6, 49, 180);  // Cornflower Blue, semi-transparent
-        Color borderColor = new Color(87, 2, 21, 236);  // Darker blue
+        Color fillColor = new Color(149, 6, 49, 180);
+        Color borderColor = new Color(87, 2, 21, 236);
 
         String[] residentialLSIClasses = {
                 // Residential
@@ -230,7 +236,7 @@ public class MapRenderer {
             drawFeatureSubSet(residentialGeoms, lsiClassName, fillColor, borderColor, 0.00001);
         }
 
-
+        // remaining residential geometries not affected by the subclasses from before
         for (DomainFeature feature : residentialGeoms) {
             addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0);
         }
@@ -406,6 +412,11 @@ public class MapRenderer {
                 drawPolygon(feature.geometry().buffer(buffer), fillColor, fillColor);
             else
                 drawLineGeometry(feature.geometry(), borderColor);
+        else if (feature.geometry() instanceof MultiLineString){
+            for (int i = 0; i < feature.geometry().getNumGeometries(); i++) {
+                drawLineGeometry(feature.geometry().getGeometryN(i), borderColor);
+            }
+        }
         else if (feature.geometry() instanceof Point)
             return;  // TODO handle points
         else if (feature.geometry() instanceof MultiPoint)

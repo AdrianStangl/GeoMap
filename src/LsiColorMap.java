@@ -8,6 +8,9 @@ public class LsiColorMap {
     private static final Map<String, ColorPair> colorMap = new HashMap<>();
 
     static {
+        // Water color, used for everything water related
+        colorMap.put("WATER", new ColorPair(new Color(70, 130, 180, 255), new Color(25, 90, 140, 255))); // steel blue tones
+        colorMap.put("SCHUTZGEBIET", new ColorPair(new Color(70, 130, 180, 255), new Color(25, 90, 140, 255))); // steel blue tones
 
         // ◼ Gebäude / Wohnen
         colorMap.put("GEWAECHSHAUS",        new ColorPair(new Color(144, 238, 144, 180), new Color(34, 139, 34, 200)));
