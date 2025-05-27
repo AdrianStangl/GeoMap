@@ -179,6 +179,7 @@ public class LsiColorMap {
         colorMap.put("HECKE",             new ColorPair(new Color(120, 180, 100, 180), new Color(80, 140, 60, 200)));    // Dense green hedge
         colorMap.put("BAUMREIHE",         new ColorPair(new Color(110, 160, 90, 180),  new Color(70, 120, 50, 200)));    // Aligned trees
         colorMap.put("EINZELNER_BAUM",    new ColorPair(new Color(130, 190, 110, 180), new Color(90, 150, 70, 200)));    // Single tree
+        colorMap.put("VEGETATION_SINGLE_OBJECT", new ColorPair(new Color(190, 230, 150, 180), new Color(140, 180, 110, 200)));
 
         // Wet grassy terrain
         colorMap.put("GRASFLAECHE",       new ColorPair(new Color(170, 220, 140, 180), new Color(130, 180, 100, 200)));  // Lush grass
@@ -197,6 +198,9 @@ public class LsiColorMap {
         colorMap.put("NADELWALD",         new ColorPair(new Color(70, 110, 80, 180),   new Color(40, 80, 50, 200)));     // Coniferous forest
         colorMap.put("MISCHWALD",         new ColorPair(new Color(80, 130, 80, 180),   new Color(50, 100, 50, 200)));    // Mixed forest
         colorMap.put("BUSCHWERK",         new ColorPair(new Color(100, 140, 90, 180),  new Color(70, 100, 60, 200)));    // Shrubbery
+        colorMap.put("WALD",                    new ColorPair(new Color(140, 190, 110, 180), new Color( 90, 140,  70, 200)));
+        // General vegetaion not in the other sub classes
+        colorMap.put("VEGETATION",              new ColorPair(new Color(170, 220, 130, 180), new Color(120, 170,  90, 200)));
 
         // Generated
 //        colorMap.put("UNDEF",                    new ColorPair(new Color(238,238,238,180), new Color(200,200,200,200)));

@@ -146,6 +146,7 @@ public class MapRenderer {
         String[] vegetationLSIClasses = {
             // single vegetation objects
             "HECKE", "BAUMREIHE", "EINZELNER_BAUM",
+            "VEGETATION_SINGLE_OBJECT",
 
             "GRASFLAECHE", "FEUCHTWIESE", "SUMPF",
 
@@ -156,7 +157,9 @@ public class MapRenderer {
 
             // Forest
             "LAUBWALD", "NADELWALD", "MISCHWALD",
-            "BUSCHWERK"
+            "BUSCHWERK" , "WALD",
+            // Rest of the vegetation
+            "VEGETATION"
         };
 
         for (String lsiClassName : vegetationLSIClasses) {
