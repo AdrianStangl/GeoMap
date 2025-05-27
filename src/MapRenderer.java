@@ -120,7 +120,11 @@ public class MapRenderer {
 
     public void drawWater(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> waterGeoms = fetcher.getFeaturesByLsiClass(connection, "WATER", null, false);
-        List<DomainFeature> otherWater = fetcher.getFeaturesByLsiClass(connection, "WASSER_LAND_FORMATION", null, false);
+        List<DomainFeature> protectGeoms = fetcher.getFeaturesByLsiClass(connection, "SCHUTZGEBIET", null, false);
+        for (DomainFeature protectedFeature : protectGeoms)
+            if(protectedFeature.realname().contains("Landschaftsschutzgebiet Wöhrder See"))
+                waterGeoms.add(protectedFeature);
+
         //waterGeoms.addAll(otherWater);  // TODO check waterland class
 
         LsiColorMap.ColorPair colorPair = LsiColorMap.getColor("WATER");
