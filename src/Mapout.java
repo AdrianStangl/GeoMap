@@ -41,7 +41,7 @@ public class Mapout {
         try {
             drawMapForParameters(connection, centerLat, centerLon, pxWidth, pxHeight, meterWidth, outputFile);
             drawMapForParameters(connection, 49.445555, 11.082587, 1024, 512, 1234.5, "examplePrompt.png");
-            drawMapForParameters(connection, 49.44750, 11.14575, 1024, 512, 2500, "zoo.png");
+            drawMapForParameters(connection, 49.44750, 11.14575, 1024, 512, 2300, "zoo.png");
             drawMapForParameters(connection, 49.45120, 11.09857, 1024, 512, 500, "see.png");
         }
         catch (Exception e) {
