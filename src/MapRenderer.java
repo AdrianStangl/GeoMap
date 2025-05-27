@@ -354,7 +354,9 @@ public class MapRenderer {
             "NATIONALPARK", "NATURSCHUTZGEBIET",
             // Security and military
             "POLIZEI", "GEFAENGNIS", "FEUERWEHR",
-            "MILITARY", "BUILDINGS_SPECIAL_USAGE"
+            "MILITARY", "BUILDINGS_SPECIAL_USAGE",
+            // Include construction works since many building are in this category...
+            "BAUSTELLE"
         };
 
         for (String lsiClassName : otherObjectsLSIClasses) {
