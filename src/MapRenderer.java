@@ -120,7 +120,11 @@ public class MapRenderer {
 
     public void drawWater(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> waterGeoms = fetcher.getFeaturesByLsiClass(connection, "WATER", null, false);
-        List<DomainFeature> otherWater = fetcher.getFeaturesByLsiClass(connection, "WASSER_LAND_FORMATION", null, false);
+        List<DomainFeature> protectGeoms = fetcher.getFeaturesByLsiClass(connection, "SCHUTZGEBIET", null, false);
+        for (DomainFeature protectedFeature : protectGeoms)
+            if(protectedFeature.realname().contains("Landschaftsschutzgebiet Wöhrder See"))
+                waterGeoms.add(protectedFeature);
+
         //waterGeoms.addAll(otherWater);  // TODO check waterland class
 
         LsiColorMap.ColorPair colorPair = LsiColorMap.getColor("WATER");
@@ -340,7 +344,7 @@ public class MapRenderer {
 
     public void drawOthers(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> otherGeoms = fetcher.getFeaturesByLsiClass(connection, "OTHER_OBJECTS", null, false);
-        Color fillColor = new Color(237, 205, 0, 221);
+        Color fillColor = new Color(220, 6, 6, 221);
         Color borderColor = new Color(198, 112, 230, 216);
 
         String[] otherObjectsLSIClasses = {
@@ -357,7 +361,9 @@ public class MapRenderer {
             "NATIONALPARK", "NATURSCHUTZGEBIET",
             // Security and military
             "POLIZEI", "GEFAENGNIS", "FEUERWEHR",
-            "MILITARY", "BUILDINGS_SPECIAL_USAGE"
+            "MILITARY", "BUILDINGS_SPECIAL_USAGE",
+            // Include construction works since many building are in this category...
+            "BAUSTELLE"
         };
 
         for (String lsiClassName : otherObjectsLSIClasses) {
@@ -373,8 +379,9 @@ public class MapRenderer {
 
         // Draw remaning geoms not in the list
         for (DomainFeature feature : otherGeoms) {
-            System.out.println("not clarified for: " + feature.realname()+ " " + feature.lsiclass1());
-            addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0);
+            System.out.println("not clarified for: " + feature.realname()+ " " + feature.lsiclass1() + " " + feature.lsiclass2()+" " + feature.lsiclass3());
+            if(!feature.realname().contains("Landschaftsschutzgebiet Wöhrder See"))
+                addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0);
         }
     }
 
@@ -511,7 +518,13 @@ public class MapRenderer {
         List<DomainFeature> subset = new ArrayList<DomainFeature>();
         for (int i = 0; i < features.size(); i++) {
             DomainFeature feature = features.get(i);
-            if (feature.lsiclass1() >= lowerBound && feature.lsiclass1() <= upperBound){
+            if (feature.lsiclass3() >= lowerBound && feature.lsiclass3() <= upperBound){
+                subset.add(features.remove(i--));
+            }
+            else if (feature.lsiclass2() >= lowerBound && feature.lsiclass2() <= upperBound){
+                subset.add(features.remove(i--));
+            }
+            else if (feature.lsiclass1() >= lowerBound && feature.lsiclass1() <= upperBound){
                 subset.add(features.remove(i--));
             }
         }

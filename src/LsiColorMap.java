@@ -174,6 +174,8 @@ public class LsiColorMap {
 
         colorMap.put("MILITARY",            new ColorPair(new Color(100, 110, 90, 180),  new Color(70, 80, 60, 200)));    // Army olive tones
         colorMap.put("BUILDINGS_SPECIAL_USAGE", new ColorPair(new Color(190, 190, 230, 180), new Color(140, 140, 180, 200))); // Special use, bluish-gray
+        colorMap.put("BAUSTELLE", new ColorPair(new Color(255, 180, 60, 220), new Color(200, 120, 30, 240)));
+
 
         // Single vegetation
         colorMap.put("HECKE",             new ColorPair(new Color(120, 180, 100, 180), new Color(80, 140, 60, 200)));    // Dense green hedge
