@@ -337,7 +337,7 @@ public class MapRenderer {
 
     public void drawOthers(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> otherGeoms = fetcher.getFeaturesByLsiClass(connection, "OTHER_OBJECTS", null, false);
-        Color fillColor = new Color(237, 205, 0, 221);
+        Color fillColor = new Color(220, 6, 6, 221);
         Color borderColor = new Color(198, 112, 230, 216);
 
         String[] otherObjectsLSIClasses = {
@@ -372,8 +372,9 @@ public class MapRenderer {
 
         // Draw remaning geoms not in the list
         for (DomainFeature feature : otherGeoms) {
-            System.out.println("not clarified for: " + feature.realname()+ " " + feature.lsiclass1());
-            addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0);
+            System.out.println("not clarified for: " + feature.realname()+ " " + feature.lsiclass1() + " " + feature.lsiclass2()+" " + feature.lsiclass3());
+            if(!feature.realname().contains("Landschaftsschutzgebiet Wöhrder See"))
+                addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0);
         }
     }
 
