@@ -508,7 +508,13 @@ public class MapRenderer {
         List<DomainFeature> subset = new ArrayList<DomainFeature>();
         for (int i = 0; i < features.size(); i++) {
             DomainFeature feature = features.get(i);
-            if (feature.lsiclass1() >= lowerBound && feature.lsiclass1() <= upperBound){
+            if (feature.lsiclass3() >= lowerBound && feature.lsiclass3() <= upperBound){
+                subset.add(features.remove(i--));
+            }
+            else if (feature.lsiclass2() >= lowerBound && feature.lsiclass2() <= upperBound){
+                subset.add(features.remove(i--));
+            }
+            else if (feature.lsiclass1() >= lowerBound && feature.lsiclass1() <= upperBound){
                 subset.add(features.remove(i--));
             }
         }
