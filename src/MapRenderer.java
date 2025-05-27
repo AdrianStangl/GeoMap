@@ -139,10 +139,29 @@ public class MapRenderer {
 
     public void drawVegetation(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> vegetationGeoms = fetcher.getFeaturesByLsiClass(connection, "VEGETATION", null, false);
-        vegetationGeoms.addAll(otherVegetation);
 
         Color fillColor = new Color(42, 195, 20, 255);  // Cornflower Blue, semi-transparent
         Color borderColor = new Color(39, 181, 21, 255);  // Darker blue
+
+        String[] vegetationLSIClasses = {
+            // single vegetation objects
+            "HECKE", "BAUMREIHE", "EINZELNER_BAUM",
+
+            "GRASFLAECHE", "FEUCHTWIESE", "SUMPF",
+
+            // Agriculture
+            "ACKERLAND", "OBST_ANBAUFLAECHE", "WEINBERG",
+            "WEIDELAND",
+            "AGRICULTURAL",
+
+            // Forest
+            "LAUBWALD", "NADELWALD", "MISCHWALD",
+            "BUSCHWERK"
+        };
+
+        for (String lsiClassName : vegetationLSIClasses) {
+            drawFeatureSubSet(vegetationGeoms, lsiClassName, fillColor, borderColor, 0.00001);
+        }
 
         for (DomainFeature feature : vegetationGeoms) {
             addDomainFeatureToGlobalList(feature, fillColor, borderColor,0);
@@ -318,21 +337,21 @@ public class MapRenderer {
 
     public void drawOthers(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> otherGeoms = fetcher.getFeaturesByLsiClass(connection, "OTHER_OBJECTS", null, false);
-        Color fillColor = new Color(224, 112, 237, 221);
+        Color fillColor = new Color(237, 205, 0, 221);
         Color borderColor = new Color(198, 112, 230, 216);
 
         String[] otherObjectsLSIClasses = {
             // Other cool things
             "SITZBANK", "MUELLEIMER", "VERKAUFSAUTOMAT",
             // Tower
-            "BEOBACHTUNGSTURM", "TURM",
+            "BEOBACHTUNGSTURM", "TURM", "BEGRENZUNG",
             // Sight points
             "ZIERBRUNNEN", "DENKMAL", "SIGHT_POINT",
             // Historic things
             "SCHLOSS", "RUINE", "SCHLOSS",
             "STADTMAUER", "STADTTOR", "HISTORIC",
             // Protected areas
-            "LANDSCHAFTSSCHUTZGEBIET", "NATIONALPARK", "NATURSCHUTZGEBIET",
+            "NATIONALPARK", "NATURSCHUTZGEBIET",
             // Security and military
             "POLIZEI", "GEFAENGNIS", "FEUERWEHR",
             "MILITARY", "BUILDINGS_SPECIAL_USAGE"
@@ -342,8 +361,16 @@ public class MapRenderer {
             drawFeatureSubSet(otherGeoms, lsiClassName, fillColor, borderColor, 0.00001);
         }
 
+        // Do not draw water here since already in draw water, just extract
+        extractLSISubSet(otherGeoms, "WASSERSCHUTZGEBIET");
+        extractLSISubSet(otherGeoms, "LANDSCHAFTSSCHUTZGEBIET");
+        // Dont care for those objects
+        extractLSISubSet(otherGeoms, "HYDRANT");
+        extractLSISubSet(otherGeoms, "MEILENSTEIN");
+
         // Draw remaning geoms not in the list
         for (DomainFeature feature : otherGeoms) {
+            System.out.println("not clarified for: " + feature.realname()+ " " + feature.lsiclass1());
             addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0);
         }
     }
@@ -470,6 +497,10 @@ public class MapRenderer {
                 System.out.println("there are " + count + " Lines");
             }
         }
+    }
+    private List<DomainFeature> extractLSISubSet(List<DomainFeature> features, String lsiClassName){
+        int[] classRange = LSIClassCentreDB.lsiClassRange(lsiClassName);
+        return extractLSISubSet(features, classRange[0], classRange[1]);
     }
 
     /// Returns subset of features list where the features are between lowerBound and upperBound, including the borders

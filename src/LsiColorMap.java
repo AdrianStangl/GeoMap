@@ -150,6 +150,7 @@ public class LsiColorMap {
         colorMap.put("MUELLEIMER",          new ColorPair(new Color(169, 169, 169, 180), new Color(105, 105, 105, 200))); // Dark gray
         colorMap.put("VERKAUFSAUTOMAT",     new ColorPair(new Color(255, 140, 105, 180), new Color(220, 90, 50, 200)));   // Vending machine orange
 
+        colorMap.put("BEGRENZUNG",          new ColorPair(new Color(150, 130, 110, 180), new Color(100, 90, 80, 200)));
         colorMap.put("BEOBACHTUNGSTURM",    new ColorPair(new Color(190, 190, 250, 180), new Color(130, 130, 200, 200))); // Pale violet tower
         colorMap.put("TURM",                new ColorPair(new Color(175, 160, 210, 180), new Color(115, 105, 160, 200))); // Purple-gray stone tower
 
@@ -174,6 +175,28 @@ public class LsiColorMap {
         colorMap.put("MILITARY",            new ColorPair(new Color(100, 110, 90, 180),  new Color(70, 80, 60, 200)));    // Army olive tones
         colorMap.put("BUILDINGS_SPECIAL_USAGE", new ColorPair(new Color(190, 190, 230, 180), new Color(140, 140, 180, 200))); // Special use, bluish-gray
 
+        // Single vegetation
+        colorMap.put("HECKE",             new ColorPair(new Color(120, 180, 100, 180), new Color(80, 140, 60, 200)));    // Dense green hedge
+        colorMap.put("BAUMREIHE",         new ColorPair(new Color(110, 160, 90, 180),  new Color(70, 120, 50, 200)));    // Aligned trees
+        colorMap.put("EINZELNER_BAUM",    new ColorPair(new Color(130, 190, 110, 180), new Color(90, 150, 70, 200)));    // Single tree
+
+        // Wet grassy terrain
+        colorMap.put("GRASFLAECHE",       new ColorPair(new Color(170, 220, 140, 180), new Color(130, 180, 100, 200)));  // Lush grass
+        colorMap.put("FEUCHTWIESE",       new ColorPair(new Color(150, 210, 170, 180), new Color(100, 170, 120, 200)));  // Moist meadow
+        colorMap.put("SUMPF",             new ColorPair(new Color(140, 160, 100, 180), new Color(90, 110, 60, 200)));    // Swamp green-brown
+
+        // Agriculture
+        colorMap.put("ACKERLAND",         new ColorPair(new Color(200, 180, 120, 180), new Color(160, 140, 80, 200)));   // Cultivated field
+        colorMap.put("OBST_ANBAUFLAECHE", new ColorPair(new Color(180, 200, 140, 180), new Color(140, 160, 100, 200)));  // Orchard
+        colorMap.put("WEINBERG",          new ColorPair(new Color(190, 210, 160, 180), new Color(150, 170, 120, 200)));  // Vineyard
+        colorMap.put("WEIDELAND",         new ColorPair(new Color(180, 230, 150, 180), new Color(140, 190, 110, 200)));  // Pasture
+        colorMap.put("AGRICULTURAL",      new ColorPair(new Color(190, 200, 130, 180), new Color(150, 160, 90, 200)));   // General agricultural land
+
+        // Forests
+        colorMap.put("LAUBWALD",          new ColorPair(new Color(90, 150, 70, 180),   new Color(60, 100, 40, 200)));    // Deciduous forest
+        colorMap.put("NADELWALD",         new ColorPair(new Color(70, 110, 80, 180),   new Color(40, 80, 50, 200)));     // Coniferous forest
+        colorMap.put("MISCHWALD",         new ColorPair(new Color(80, 130, 80, 180),   new Color(50, 100, 50, 200)));    // Mixed forest
+        colorMap.put("BUSCHWERK",         new ColorPair(new Color(100, 140, 90, 180),  new Color(70, 100, 60, 200)));    // Shrubbery
 
         // Generated
 //        colorMap.put("UNDEF",                    new ColorPair(new Color(238,238,238,180), new Color(200,200,200,200)));
