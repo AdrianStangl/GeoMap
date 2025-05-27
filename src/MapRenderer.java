@@ -324,7 +324,7 @@ public class MapRenderer {
         Color haltestelleFillColor = new Color(168, 134, 134, 255);
         drawFeatureSubSet(openareaGeoms, "HALTESTELLE", haltestelleFillColor, haltestelleFillColor, 0.00001);
 
-        Color parkFillColor = new Color(4, 151, 4, 255);
+        Color parkFillColor = new Color(81, 188, 81, 255);
         drawFeatureSubSet(openareaGeoms, "GENERAL_PUBLIC_PLACE", parkFillColor, parkFillColor, 0.00001);
 
         // Extract and draw tram tracks

@@ -203,6 +203,7 @@ public class LsiColorMap {
         colorMap.put("WALD",                    new ColorPair(new Color(140, 190, 110, 180), new Color( 90, 140,  70, 200)));
         // General vegetaion not in the other sub classes
         colorMap.put("VEGETATION",              new ColorPair(new Color(170, 220, 130, 180), new Color(120, 170,  90, 200)));
+        colorMap.put("GENERAL_PUBLIC_PLACE",    new ColorPair(new Color(81, 188, 81, 255), new Color(81, 188, 81, 255)));
 
         // Generated
 //        colorMap.put("UNDEF",                    new ColorPair(new Color(238,238,238,180), new Color(200,200,200,200)));
