@@ -131,7 +131,6 @@ public class MapRenderer {
             if(!feature.tags().contains("tunnel"))
                 if(feature.tags().toLowerCase().contains("stream")){
                     addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0.00003);
-                    System.out.println("bach found " + feature.realname());
                 }
                 else
                     addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0.0001);
@@ -140,7 +139,6 @@ public class MapRenderer {
 
     public void drawVegetation(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> vegetationGeoms = fetcher.getFeaturesByLsiClass(connection, "VEGETATION", null, false);
-        List<DomainFeature> otherVegetation = fetcher.getFeaturesByLsiClass(connection, "PARK", null, false);
         vegetationGeoms.addAll(otherVegetation);
 
         Color fillColor = new Color(42, 195, 20, 255);  // Cornflower Blue, semi-transparent
@@ -320,30 +318,31 @@ public class MapRenderer {
 
     public void drawOthers(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> otherGeoms = fetcher.getFeaturesByLsiClass(connection, "OTHER_OBJECTS", null, false);
+        Color fillColor = new Color(224, 112, 237, 221);
+        Color borderColor = new Color(198, 112, 230, 216);
 
-        // Extract and draw tram tracks
-        Color cityWallFillColor = new Color(204, 59, 27, 255);
-        Color cityWallBorderColor = new Color(147, 42, 19, 255);
-        drawFeatureSubSet(otherGeoms, "STADTMAUER", cityWallFillColor, cityWallBorderColor, 0.00001);
-        drawFeatureSubSet(otherGeoms, "TURM", cityWallFillColor, cityWallBorderColor, 0.00001);
+        String[] otherObjectsLSIClasses = {
+            // Other cool things
+            "SITZBANK", "MUELLEIMER", "VERKAUFSAUTOMAT",
+            // Tower
+            "BEOBACHTUNGSTURM", "TURM",
+            // Sight points
+            "ZIERBRUNNEN", "DENKMAL", "SIGHT_POINT",
+            // Historic things
+            "SCHLOSS", "RUINE", "SCHLOSS",
+            "STADTMAUER", "STADTTOR", "HISTORIC",
+            // Protected areas
+            "LANDSCHAFTSSCHUTZGEBIET", "NATIONALPARK", "NATURSCHUTZGEBIET",
+            // Security and military
+            "POLIZEI", "GEFAENGNIS", "FEUERWEHR",
+            "MILITARY", "BUILDINGS_SPECIAL_USAGE"
+        };
 
-        Color waterProtectAreaFillColor = new Color(39, 134, 227, 242);
-        drawFeatureSubSet(otherGeoms, "SCHUTZGEBIET", waterProtectAreaFillColor, waterProtectAreaFillColor, 0);
+        for (String lsiClassName : otherObjectsLSIClasses) {
+            drawFeatureSubSet(otherGeoms, lsiClassName, fillColor, borderColor, 0.00001);
+        }
 
-        Color begrenzungColor = new Color(66, 58, 57, 255);
-        drawFeatureSubSet(otherGeoms, "BEGRENZUNG", begrenzungColor, begrenzungColor, 0.00001);
-
-        Color historicColor = new Color(182, 53, 39, 255);
-        Color historicBorderColor = new Color(145, 44, 30, 255);
-        drawFeatureSubSet(otherGeoms, "HISTORIC", historicColor, historicBorderColor, 0.00001);
-
-        Color specialBuildingColor = new Color(113, 27, 20, 255);
-        Color specialBuildingBorderColor = new Color(69, 17, 10, 255);
-        drawFeatureSubSet(otherGeoms, "BUILDINGS_SPECIAL_USAGE", specialBuildingColor, specialBuildingBorderColor, 0.00001);
-
-
-        Color fillColor = new Color(233, 0, 255, 255);
-        Color borderColor = new Color(200, 95, 239, 236);
+        // Draw remaning geoms not in the list
         for (DomainFeature feature : otherGeoms) {
             addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0);
         }

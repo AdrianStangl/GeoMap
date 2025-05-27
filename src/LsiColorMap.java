@@ -2,6 +2,7 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
+// Note: Colors have been AI generated with a lot of pain and suffering
 public class LsiColorMap {
     public record ColorPair(Color fill, Color stroke) {}
 
@@ -144,6 +145,34 @@ public class LsiColorMap {
         // Catch-all commercial
         colorMap.put("COMMERCIAL", new ColorPair(new Color(245, 245, 220, 180), new Color(200, 200, 180, 200))); // soft beige-grey
 
+        // Other object colors
+        colorMap.put("SITZBANK",            new ColorPair(new Color(205, 133, 63, 180),  new Color(139, 90, 43, 200)));   // Saddle brown
+        colorMap.put("MUELLEIMER",          new ColorPair(new Color(169, 169, 169, 180), new Color(105, 105, 105, 200))); // Dark gray
+        colorMap.put("VERKAUFSAUTOMAT",     new ColorPair(new Color(255, 140, 105, 180), new Color(220, 90, 50, 200)));   // Vending machine orange
+
+        colorMap.put("BEOBACHTUNGSTURM",    new ColorPair(new Color(190, 190, 250, 180), new Color(130, 130, 200, 200))); // Pale violet tower
+        colorMap.put("TURM",                new ColorPair(new Color(175, 160, 210, 180), new Color(115, 105, 160, 200))); // Purple-gray stone tower
+
+        colorMap.put("ZIERBRUNNEN",         new ColorPair(new Color(180, 230, 250, 180), new Color(120, 190, 220, 200))); // Light blue decorative fountain
+        colorMap.put("DENKMAL",             new ColorPair(new Color(210, 180, 140, 180), new Color(160, 130, 90, 200)));  // Tan historic monument
+        colorMap.put("SIGHT_POINT",         new ColorPair(new Color(240, 200, 120, 180), new Color(200, 160, 80, 200)));  // Golden view point
+
+        colorMap.put("SCHLOSS",             new ColorPair(new Color(200, 170, 180, 180), new Color(150, 120, 130, 200))); // Soft royal rose castle
+        colorMap.put("RUINE",               new ColorPair(new Color(160, 160, 140, 180), new Color(110, 110, 90, 200)));  // Weathered stone ruins
+        colorMap.put("STADTMAUER",          new ColorPair(new Color(190, 155, 120, 180), new Color(140, 115, 90, 200)));  // Brick historic wall
+        colorMap.put("STADTTOR",            new ColorPair(new Color(170, 140, 110, 180), new Color(120, 100, 80, 200)));  // Gate wood/stone
+        colorMap.put("HISTORIC",            new ColorPair(new Color(185, 165, 145, 180), new Color(135, 115, 95, 200)));  // Generic historic site
+
+        colorMap.put("LANDSCHAFTSSCHUTZGEBIET", new ColorPair(new Color(170, 220, 180, 180), new Color(110, 180, 130, 200))); // Light green preserve
+        colorMap.put("NATIONALPARK",        new ColorPair(new Color(150, 200, 150, 180), new Color(90, 160, 90, 200)));       // Deep green
+        colorMap.put("NATURSCHUTZGEBIET",   new ColorPair(new Color(190, 230, 170, 180), new Color(130, 190, 110, 200)));     // Pale nature zone
+
+        colorMap.put("POLIZEI",             new ColorPair(new Color(70, 130, 180, 180),  new Color(25, 90, 140, 200)));   // Strong blue
+        colorMap.put("GEFAENGNIS",          new ColorPair(new Color(120, 120, 120, 180), new Color(80, 80, 80, 200)));    // Dark gray stone
+        colorMap.put("FEUERWEHR",           new ColorPair(new Color(255, 100, 100, 180), new Color(200, 50, 50, 200)));   // Fire red
+
+        colorMap.put("MILITARY",            new ColorPair(new Color(100, 110, 90, 180),  new Color(70, 80, 60, 200)));    // Army olive tones
+        colorMap.put("BUILDINGS_SPECIAL_USAGE", new ColorPair(new Color(190, 190, 230, 180), new Color(140, 140, 180, 200))); // Special use, bluish-gray
 
 
         // Generated
