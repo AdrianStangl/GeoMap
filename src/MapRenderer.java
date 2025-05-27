@@ -66,7 +66,7 @@ public class MapRenderer {
         drawGeology(connection, fetcher);
         drawVegetation(connection, fetcher);
         drawResidential(connection, fetcher);
-        drawCommercial(connection, fetcher);
+        //drawCommercial(connection, fetcher);
         drawOpenarea(connection, fetcher);
         drawOthers(connection, fetcher);
         //markStuff(fetcher.getFeaturesByLsiClass(connection, "UNDEF"));
@@ -180,6 +180,41 @@ public class MapRenderer {
         Color fillColor = new Color(207, 73, 114, 180);  // Cornflower Blue, semi-transparent
         Color borderColor = new Color(159, 11, 46, 236);  // Darker blue
 
+        String[] commercialLSIClasses = {
+                // Commercial
+                // Every gastronomie
+                "GASTRONOMY",
+                // Every shop
+                "SHOP_MORE", "LESEN_SCHREIBEN", "BAUEN_EINRICHTEN_GARTEN",
+                "ELEKTRONIKSHOP", "SPORT_FREIZEIT_SHOP", "KLEIDUNG",
+                "KOERPERPFLEGE", "LEBENSMITTEL",
+                "SHOP",
+                // Every Handwerk
+                "HANDWERK",
+                // Sonstige  commercial ober kategorien
+                "DIENSTLEISTUNG_AUTO", "FINANZEINRICHTUNG" , "POST",
+                "COMMUNICATION", "TOILETS", "UNTERHALTUNG_KOMMERZIELL",
+                "NACHTLEBEN", "WEITERE_DIENSTLEISTUNGEN", "UEBERNACHTUNGEN",
+
+                "BEHOERDE",
+                // Medical
+                "KRANKENHAUS", "APOTHEKE", "ARZTPRAXIS",
+                "MEDICAL",
+
+                "SOCIAL_RELIGIOES",
+                // Freizeit
+                "UNTERHALTUNGSGEBAEUDE", "TIERPARK" , "FREIZEIT",
+                // Laendlich
+                "LAENDLICH",
+
+                // Remaining non listed commercial things
+                "COMMERCIAL"
+        };
+
+        for (String lsiClassName : commercialLSIClasses){
+            drawFeatureSubSet(commercialGeoms, lsiClassName, fillColor, borderColor, 0.00001);
+        }
+
         for (DomainFeature feature : commercialGeoms) {
             addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0);
         }
@@ -257,7 +292,7 @@ public class MapRenderer {
         };
 
         for (String lsiClassName : residentialLSIClasses){
-            drawFeatureSubSet(residentialGeoms, lsiClassName, fillColor, borderColor, 0.00001);
+            drawFeatureSubSet(residentialGeoms, lsiClassName, fillColor, borderColor, 0.00002);
         }
 
         // remaining residential geometries not affected by the subclasses from before
@@ -367,7 +402,7 @@ public class MapRenderer {
         };
 
         for (String lsiClassName : otherObjectsLSIClasses) {
-            drawFeatureSubSet(otherGeoms, lsiClassName, fillColor, borderColor, 0.00001);
+            drawFeatureSubSet(otherGeoms, lsiClassName, fillColor, borderColor, 0.00002);
         }
 
         // Do not draw water here since already in draw water, just extract
