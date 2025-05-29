@@ -402,7 +402,7 @@ public class MapRenderer {
         };
 
         for (String lsiClassName : otherObjectsLSIClasses) {
-            drawFeatureSubSet(otherGeoms, lsiClassName, fillColor, borderColor, 0.00002);
+            drawFeatureSubSet(otherGeoms, lsiClassName, fillColor, borderColor, 0.000025);
         }
 
         // Do not draw water here since already in draw water, just extract
@@ -423,6 +423,7 @@ public class MapRenderer {
     public void markStuff(List<DomainFeature> stuff) throws Exception {
         Color fillColor = new Color(229, 26, 236, 255);  // Cornflower Blue, semi-transparent
         Color borderColor = new Color(255, 0, 234, 255);  // Darker blue
+        Color testColor = new Color(92, 80, 70, 240);
 
         for (DomainFeature feature : stuff) {
             addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0.0005);

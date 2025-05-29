@@ -150,7 +150,7 @@ public class LsiColorMap {
         colorMap.put("MUELLEIMER",          new ColorPair(new Color(169, 169, 169, 180), new Color(105, 105, 105, 200))); // Dark gray
         colorMap.put("VERKAUFSAUTOMAT",     new ColorPair(new Color(255, 140, 105, 180), new Color(220, 90, 50, 200)));   // Vending machine orange
 
-        colorMap.put("BEGRENZUNG",          new ColorPair(new Color(150, 130, 110, 180), new Color(100, 90, 80, 200)));
+        colorMap.put("BEGRENZUNG",          new ColorPair(new Color(150, 130, 110, 220), new Color(100, 90, 80, 200)));
         colorMap.put("BEOBACHTUNGSTURM",    new ColorPair(new Color(190, 190, 250, 180), new Color(130, 130, 200, 200))); // Pale violet tower
         colorMap.put("TURM",                new ColorPair(new Color(175, 160, 210, 180), new Color(115, 105, 160, 200))); // Purple-gray stone tower
 
