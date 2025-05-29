@@ -407,7 +407,7 @@ public class MapRenderer {
 
         // Do not draw water here since already in draw water, just extract
         extractLSISubSet(otherGeoms, "WASSERSCHUTZGEBIET");
-        extractLSISubSet(otherGeoms, "LANDSCHAFTSSCHUTZGEBIET");
+        extractLSISubSet(otherGeoms, "SCHUTZGEBIET");
         // Dont care for those objects
         extractLSISubSet(otherGeoms, "HYDRANT");
         extractLSISubSet(otherGeoms, "MEILENSTEIN");
