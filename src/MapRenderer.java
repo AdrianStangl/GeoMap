@@ -303,15 +303,15 @@ public class MapRenderer {
 
     public void drawOpenarea(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> openareaGeoms = fetcher.getFeaturesByLsiClass(connection, "OPENAREA", null, false);
+        Color fillColor = new Color(237, 222, 107, 255);  // Cornflower Blue, semi-transparent
+        Color borderColor = new Color(200, 190, 73, 236);  // Darker blue
+
         // Extract and draw streets
         int[] strassenLSIBoundaries = LSIClassCentreDB.lsiClassRange("STRASSEN_WEGE");
         List<DomainFeature> strassenGeos = extractLSISubSet(openareaGeoms, strassenLSIBoundaries[0], strassenLSIBoundaries[1]);
         drawStreets(strassenGeos);
 
-        // Extract and draw Parking spaces
-        Color parkingSpaceColor = new Color(92, 79, 79, 255);
-        drawFeatureSubSet(openareaGeoms, "RUHENDER_VERKEHR", parkingSpaceColor, parkingSpaceColor, 0.00001);
-
+        // These classes need to be drawn before
         // Extract and draw tracks
         Color trackFillColor = new Color(43, 37, 37, 255);
         drawFeatureSubSet(openareaGeoms, "GLEISKOERPER", trackFillColor, trackFillColor, 0.00001);
@@ -324,16 +324,42 @@ public class MapRenderer {
         Color haltestelleFillColor = new Color(168, 134, 134, 255);
         drawFeatureSubSet(openareaGeoms, "HALTESTELLE", haltestelleFillColor, haltestelleFillColor, 0.00001);
 
-        Color parkFillColor = new Color(81, 188, 81, 255);
-        drawFeatureSubSet(openareaGeoms, "GENERAL_PUBLIC_PLACE", parkFillColor, parkFillColor, 0.00001);
 
-        // Extract and draw tram tracks
-        Color trainStationFillColor = new Color(119, 118, 118, 255);
-        drawFeatureSubSet(openareaGeoms, "BAHNVERKEHR", trainStationFillColor, trainStationFillColor, 0.00001);
+        String[] residentialLSIClasses = {
+                // Residential
+                "MUELLDEPONIE",
+                "UBAHN_GLEISE", "BAHNKONTROLLZENTRUM",
+                "BAHNVERKEHR",
+                "BRIDGE", "BRIDGE_RELATION",
+                "STRASSENLAMPE", "BOOTSVERLEIH", "HAFEN_ALL",
+                "HUBSCHRAUBER_LANDEPLATZ", "FLUGHAFEN",
 
-        // Extract and draw tram tracks
-        Color trafficOtherFillColor = new Color(89, 84, 84, 255);
-        drawFeatureSubSet(openareaGeoms, "TRAFFIC_PLACE", trafficOtherFillColor, trafficOtherFillColor, 0.00001);
+                "BUSBAHNHOF", "BUSHALTESTELLE", "U_BAHN_HALTESTELLE",
+                "TRAM_HALTESTELLE", "HALTESTELLE", "BAHNHOF",
+
+                "PARKHAUS", "RASTPLATZ", "RASTSTAETTE",
+                "ALLGEMEINER_PARKPLATZ",
+
+                "WERTSTOFFSAMMELSTELLE", "SCHWIMMBAD_ALL",
+
+                "KLETTERN", "RENNBAHN", "GOLFPLATZ",
+                "BASKETBALL_FELD", "BOWLING", "TISCHTENNIS",
+                "MINIGOLF", "RUDERN", "FAHRRADFAHREN",
+                "BEACHVOLLEYBALL", "HANDBALL", "BOGENSCHIESSEN",
+                "MODELLFLUG", "FUSSBALL", "REITEN",
+                "TENNISPLATZ", "SPORTPLATZ", "STADION",
+                "SPORTS_PLACE", // remaning places
+
+                "GRUENFLAECHE", "NAHERHOLUNGSGEBIET", "CAMPINGPLATZ",
+                "SPIELPLATZ", "HUNDEPARK", "GRILLSTELLE",
+                "PICNIC_PLATZ", "GARTEN", "PARK",
+                "GENERAL_PUBLIC_PLACE",
+                "PUBLIC_PLACE", // Remaining things
+        };
+
+        for (String lsiClassName : residentialLSIClasses){
+            drawFeatureSubSet(openareaGeoms, lsiClassName, fillColor, borderColor, 0.00002);
+        }
 
         // Extract and draw streets
         // TODO Brücken nicht entfernen -> Upper bound anpassen
@@ -343,8 +369,6 @@ public class MapRenderer {
         trash = extractLSISubSet(openareaGeoms, trashLSIBoundaries[0], trashLSIBoundaries[1]);
 
         // draw the remaining open areas
-        Color fillColor = new Color(239, 221, 18, 255);  // Cornflower Blue, semi-transparent
-        Color borderColor = new Color(236, 220, 50, 236);  // Darker blue
         for (DomainFeature feature : openareaGeoms) {
             addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0);
         }

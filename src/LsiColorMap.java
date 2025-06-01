@@ -203,7 +203,73 @@ public class LsiColorMap {
         colorMap.put("WALD",              new ColorPair(new Color(140, 190, 110, 180), new Color( 90, 140,  70, 200)));
         // General vegetaion not in the other sub classes
         colorMap.put("VEGETATION",              new ColorPair(new Color(170, 220, 130, 180), new Color(120, 170,  90, 200)));
-        colorMap.put("GENERAL_PUBLIC_PLACE",    new ColorPair(new Color(81, 188, 81, 255), new Color(81, 188, 81, 255)));
+
+        // Openarea stuff
+        colorMap.put("MUELLDEPONIE",        new ColorPair(new Color(100, 90, 70, 180),   new Color(60, 55, 45, 200)));   // dusty brown/grey
+        colorMap.put("TRAM_GLEISE",         new ColorPair(new Color(21, 20, 20, 255),    new Color(21, 20, 20, 255)));   // dark asphalt/steel
+        colorMap.put("UBAHN_GLEISE",        new ColorPair(new Color(60, 65, 80, 180),    new Color(40, 45, 60, 200)));   // darker steel/underground
+        colorMap.put("BAHNKONTROLLZENTRUM", new ColorPair(new Color(85, 70, 100, 180),   new Color(55, 45, 75, 200)));   // subdued violet-grey
+        colorMap.put("BAHNVERKEHR",         new ColorPair(new Color(119, 118, 118, 255),    new Color(119, 118, 118, 255)));   // deep charcoal (pure infra)
+        colorMap.put("GLEISKOERPER",         new ColorPair(new Color(43, 37, 37, 255),    new Color(43, 37, 37, 255)));   // deep charcoal (pure infra)
+        colorMap.put("TRAFFIC_PLACE",         new ColorPair(new Color(89, 84, 84, 255),    new Color(89, 84, 84, 255)));   // deep charcoal (pure infra)
+
+        colorMap.put("BRIDGE",                    new ColorPair(new Color(220, 210, 200, 180), new Color(160, 150, 140, 200)));
+        colorMap.put("BRIDGE_RELATION",           new ColorPair(new Color(210, 200, 190, 180), new Color(150, 140, 130, 200)));
+
+        colorMap.put("STRASSENLAMPE",             new ColorPair(new Color(255, 245, 180, 180), new Color(210, 200, 130, 200)));
+        colorMap.put("BOOTSVERLEIH",              new ColorPair(new Color(170, 215, 230, 180), new Color(110, 160, 180, 200)));
+        colorMap.put("HAFEN_ALL",                 new ColorPair(new Color(160, 200, 220, 180), new Color(100, 140, 160, 200)));
+
+        colorMap.put("HUBSCHRAUBER_LANDEPLATZ",   new ColorPair(new Color(240, 220, 190, 180), new Color(180, 160, 130, 200)));
+        colorMap.put("FLUGHAFEN",                 new ColorPair(new Color(230, 210, 180, 180), new Color(170, 150, 120, 200)));
+
+        colorMap.put("BUSBAHNHOF",                new ColorPair(new Color(90, 90, 90, 180),   new Color(50, 50, 50, 200)));  // dark gray
+        colorMap.put("BUSHALTESTELLE",            new ColorPair(new Color(85, 85, 85, 180),   new Color(45, 45, 45, 200)));
+        colorMap.put("U_BAHN_HALTESTELLE",        new ColorPair(new Color(70, 70, 80, 180),   new Color(40, 40, 50, 200)));  // steely
+        colorMap.put("TRAM_HALTESTELLE",          new ColorPair(new Color(80, 75, 70, 180),   new Color(45, 40, 35, 200)));  // asphalt
+        colorMap.put("HALTESTELLE",               new ColorPair(new Color(168, 134, 134, 255),   new Color(168, 134, 134, 255)));
+        colorMap.put("BAHNHOF",                   new ColorPair(new Color(55, 55, 65, 180),   new Color(25, 25, 35, 200)));  // dark blue-gray
+
+
+        colorMap.put("PARKHAUS",                  new ColorPair(new Color(210, 210, 210, 180), new Color(160, 160, 160, 200)));
+        colorMap.put("RASTPLATZ",                 new ColorPair(new Color(200, 230, 200, 180), new Color(140, 180, 140, 200)));
+        colorMap.put("RASTSTAETTE",               new ColorPair(new Color(195, 225, 195, 180), new Color(135, 175, 135, 200)));
+        colorMap.put("ALLGEMEINER_PARKPLATZ",     new ColorPair(new Color(190, 220, 190, 180), new Color(130, 170, 130, 200)));
+
+        colorMap.put("WERTSTOFFSAMMELSTELLE",     new ColorPair(new Color(180, 200, 180, 180), new Color(120, 140, 120, 200)));
+        colorMap.put("SCHWIMMBAD_ALL",            new ColorPair(new Color(160, 215, 240, 180), new Color(100, 165, 190, 200)));
+
+        colorMap.put("KLETTERN",                  new ColorPair(new Color(220, 200, 180, 180), new Color(160, 140, 120, 200)));
+        colorMap.put("RENNBAHN",                  new ColorPair(new Color(200, 170, 160, 180), new Color(140, 110, 100, 200)));
+        colorMap.put("GOLFPLATZ",                 new ColorPair(new Color(180, 220, 150, 180), new Color(120, 160, 100, 200)));
+        colorMap.put("BASKETBALL_FELD",           new ColorPair(new Color(250, 190, 160, 180), new Color(190, 130, 100, 200)));
+        colorMap.put("BOWLING",                   new ColorPair(new Color(230, 180, 180, 180), new Color(170, 120, 120, 200)));
+        colorMap.put("TISCHTENNIS",               new ColorPair(new Color(220, 240, 220, 180), new Color(160, 180, 160, 200)));
+        colorMap.put("MINIGOLF",                  new ColorPair(new Color(190, 230, 190, 180), new Color(130, 170, 130, 200)));
+        colorMap.put("RUDERN",                    new ColorPair(new Color(160, 210, 230, 180), new Color(100, 150, 170, 200)));
+        colorMap.put("FAHRRADFAHREN",             new ColorPair(new Color(220, 230, 180, 180), new Color(160, 170, 120, 200)));
+        colorMap.put("BEACHVOLLEYBALL",           new ColorPair(new Color(250, 230, 160, 180), new Color(190, 170, 100, 200)));
+        colorMap.put("HANDBALL",                  new ColorPair(new Color(240, 200, 160, 180), new Color(180, 140, 100, 200)));
+        colorMap.put("BOGENSCHIESSEN",            new ColorPair(new Color(230, 210, 190, 180), new Color(170, 150, 130, 200)));
+        colorMap.put("MODELLFLUG",                new ColorPair(new Color(210, 240, 250, 180), new Color(150, 180, 190, 200)));
+        colorMap.put("FUSSBALL",                  new ColorPair(new Color(180, 240, 180, 180), new Color(120, 180, 120, 200)));
+        colorMap.put("REITEN",                    new ColorPair(new Color(230, 210, 170, 180), new Color(170, 150, 110, 200)));
+        colorMap.put("TENNISPLATZ",               new ColorPair(new Color(160, 230, 200, 180), new Color(100, 170, 140, 200)));
+        colorMap.put("SPORTPLATZ",                new ColorPair(new Color(190, 240, 210, 180), new Color(130, 180, 150, 200)));
+        colorMap.put("STADION",                   new ColorPair(new Color(200, 220, 240, 180), new Color(140, 160, 180, 200)));
+        colorMap.put("SPORTS_PLACE",              new ColorPair(new Color(180, 230, 220, 180), new Color(120, 170, 160, 200)));
+
+        colorMap.put("GRUENFLAECHE",         new ColorPair(new Color(81, 188, 81, 200),   new Color(60, 140, 60, 220)));
+        colorMap.put("NAHERHOLUNGSGEBIET",   new ColorPair(new Color(76, 168, 88, 200),   new Color(56, 128, 66, 220)));
+        colorMap.put("CAMPINGPLATZ",         new ColorPair(new Color(97, 158, 73, 200),   new Color(67, 118, 53, 220)));
+        colorMap.put("SPIELPLATZ",           new ColorPair(new Color(110, 160, 90, 200),  new Color(80, 120, 65, 220)));
+        colorMap.put("HUNDEPARK",            new ColorPair(new Color(95, 145, 85, 200),   new Color(65, 105, 60, 220)));
+        colorMap.put("GRILLSTELLE",          new ColorPair(new Color(102, 132, 70, 200),  new Color(70, 100, 50, 220)));
+        colorMap.put("PICNIC_PLATZ",         new ColorPair(new Color(115, 150, 85, 200),  new Color(85, 110, 60, 220)));
+        colorMap.put("GARTEN",               new ColorPair(new Color(90, 160, 75, 200),   new Color(60, 120, 50, 220)));
+        colorMap.put("PARK",                 new ColorPair(new Color(81, 170, 81, 200),   new Color(55, 125, 55, 220)));
+        colorMap.put("GENERAL_PUBLIC_PLACE", new ColorPair(new Color(81, 188, 81, 255),   new Color(61, 148, 61, 255)));
+        colorMap.put("PUBLIC_PLACE",         new ColorPair(new Color(76, 160, 90, 200),   new Color(56, 120, 66, 220)));
     }
 
     public static ColorPair getColor(String key) {
