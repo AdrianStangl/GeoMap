@@ -3,6 +3,7 @@ import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -30,7 +31,10 @@ public class MapRenderer {
     private final double scaleX;
     private final double scaleY;
 
+    private final int iconSize = 24; // Square icon size in pixels
+
     private List<DrawableFeature> drawableFeatures;
+    private List<IconDrawInfo> iconDrawList = new ArrayList<>();
 
     public MapRenderer(Connection conn, Geometry targetSquare,
                        int pxWidth, int pxHeight) throws Exception {
@@ -77,7 +81,39 @@ public class MapRenderer {
         for (DrawableFeature drawFeature : drawableFeatures) {
             drawDomainFeature(drawFeature.feature(), drawFeature.fillColor(), drawFeature.borderColor(), drawFeature.buffer());
         }
+
+        System.out.println("icon amount " + iconDrawList.size());
+        for (IconDrawInfo icon : iconDrawList) {
+            try {
+                BufferedImage img = ImageIO.read(new File(icon.iconPath()));
+                drawIconWithLabel(g, img, icon.x(), icon.y(), icon.width(), icon.height(), icon.label().contains("_") ? icon.label().substring(0, icon.label().indexOf('_')) : icon.label());
+            } catch (IOException e) {
+                System.err.println("Could not load icon: " + icon.iconPath());
+            }
+        }
     }
+
+    private void drawIconWithLabel(Graphics2D g, BufferedImage icon, int x, int y, int width, int height, String label) {
+        // Icon zeichnen (zentriert um x/y)
+        g.drawImage(icon, x, y, width, height, null);
+
+        // Text vorbereiten
+        Font font = new Font("SansSerif", Font.BOLD, 10);
+        g.setFont(font);
+        FontMetrics metrics = g.getFontMetrics(font);
+
+        int textX = x + width / 2 - metrics.stringWidth(label) / 2;
+        int textY = y + height + metrics.getAscent() + 2;
+
+        // Schatten (schwarz)
+        g.setColor(Color.BLACK);
+        g.drawString(label, textX + 1, textY + 1);
+
+        // Vordergrund (weiß)
+        g.setColor(Color.WHITE);
+        g.drawString(label, textX, textY);
+    }
+
 
     public void drawPolygon(Geometry geom, Color fillColor, Color borderColor) {
         Path2D path = new Path2D.Double();
@@ -492,7 +528,40 @@ public class MapRenderer {
             }
         else
             System.out.println("Instance of " + feature.geometry().getClass().getName() + " is not supported");
+
+        int lsiClass = feature.lsiclass1();
+        String[] iconName = new String[1];
+        if (shouldDisplayIcon(lsiClass, iconName)) {
+            Coordinate center = feature.geometry().getCentroid().getCoordinate();
+            int iconX = toPixelX(center.x) - iconSize / 2; // center with 24px icon
+            int iconY = toPixelY(center.y) - iconSize / 2;
+
+            iconDrawList.add(new IconDrawInfo(
+                    "icons/" + iconName[0] + ".png",
+                    iconX, iconY, iconSize, iconSize, feature.realname()
+            ));
+        }
     }
+
+    private boolean shouldDisplayIcon(int lsiClass, String[] iconNameOut) {
+        iconNameOut[0] = null;
+
+        if (lsiClass == 93120000) //{
+            iconNameOut[0] = "fontain";
+//        } else if (lsiClass == 93130000) {
+//            iconNameOut[0] = "spielplatz";
+//        } else if (lsiClass == 21000000) {
+//            iconNameOut[0] = "park";
+//        } else if (lsiClass == 24110000) {
+//            iconNameOut[0] = "haltestelle";
+//        } else if (lsiClass == 74100000) {
+//            iconNameOut[0] = "toilets";
+//        }
+
+        return iconNameOut[0] != null;
+    }
+
+
 
     private void addDomainFeatureToGlobalList(DomainFeature feature, Color fillColor, Color borderColor, double buffer){
         drawableFeatures.add(new DrawableFeature(feature,fillColor,borderColor, buffer));
