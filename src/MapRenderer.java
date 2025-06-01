@@ -443,35 +443,6 @@ public class MapRenderer {
         drawStreetsFromDomainFeatures(streetGeoms, fillColor, borderColor, 0.000045, 0.00003);
     }
 
-    /**
-     * Zeichnet Flächenobjekte (geometry='A')
-     */
-    public void drawAreas(Connection conn) throws Exception {
-        String sql =
-                "SELECT lsiclass1, ST_AsEWKB(geom :: geometry) " +
-                        "FROM domain " +
-                        "WHERE geometry='A' AND ST_Within(geom :: geometry, ST_GeomFromWKB(?,4326))";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setBytes(1, new WKBWriter().write(target));
-            try (ResultSet rs = ps.executeQuery()) {
-                int count = 0;
-                WKBReader reader = new WKBReader();
-                while (rs.next()) {
-                    count++;
-                    int lsiClass = rs.getInt("lsiclass1");
-                    byte[] wkb = rs.getBytes(2);
-                    Geometry geom = reader.read(wkb);
-
-                    Color fill = new Color(200, 200, 200, 180);
-                    Color border = Color.darkGray;
-
-                    drawPolygon(geom, fill, border);
-                }
-                System.out.println("There are " + count + " polygons");
-            }
-        }
-    }
-
     private void drawDomainFeature(DomainFeature feature, Color fillColor, Color borderColor, double buffer){
         if(feature.geometry() instanceof Polygon)
             drawPolygon(feature.geometry(), fillColor, borderColor);
@@ -504,46 +475,11 @@ public class MapRenderer {
     // TODO Check if still need this method or merge with other subset draw
     /// Draws a thick line of border color and a thinner liner of fillColor
     private void drawStreetsFromDomainFeatures(List<DomainFeature> features, Color fillColor, Color borderColor, double outerBuffer, double innerBuffer) {
-//        for (DomainFeature feature : features) {
-//            addDomainFeatureToGlobalList(feature, borderColor, borderColor, outerBuffer);
-//        }
         for (DomainFeature feature : features) {
             addDomainFeatureToGlobalList(feature, fillColor, borderColor, innerBuffer);
         }
     }
 
-    /**
-     * Zeichnet Linienobjekte (geometry='L')
-     */
-    public void drawLines(Connection conn) throws Exception {
-        String sql =
-                "SELECT ST_AsEWKB(geom :: geometry), realname " +
-                        "FROM domain " +
-                        "WHERE geometry='L' AND ST_Within(geom :: geometry, ST_GeomFromWKB(?,4326))";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setBytes(1, new WKBWriter().write(target));
-            try (ResultSet rs = ps.executeQuery()) {
-                WKBReader reader = new WKBReader();
-                int count = 0;
-                while (rs.next()) {
-                    count++;
-                    byte[] wkb = rs.getBytes(1);
-                    String name = rs.getString(2);
-                    Geometry geom = reader.read(wkb);
-                    Path2D path = new Path2D.Double();
-                    boolean first = true;
-                    for (Coordinate c : geom.getCoordinates()) {
-                        int x = toPixelX(c.x), y = toPixelY(c.y);
-                        if (first) { path.moveTo(x,y); first = false; }
-                        else      path.lineTo(x,y);
-                    }
-                    g.setColor(Color.DARK_GRAY);
-                    g.draw(path);
-                }
-                System.out.println("there are " + count + " Lines");
-            }
-        }
-    }
     private List<DomainFeature> extractLSISubSet(List<DomainFeature> features, String lsiClassName){
         int[] classRange = LSIClassCentreDB.lsiClassRange(lsiClassName);
         return extractLSISubSet(features, classRange[0], classRange[1]);
