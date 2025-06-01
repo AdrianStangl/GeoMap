@@ -379,8 +379,8 @@ public class MapRenderer {
 
     public void drawOthers(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> otherGeoms = fetcher.getFeaturesByLsiClass(connection, "OTHER_OBJECTS", null, false);
-        Color fillColor = new Color(220, 6, 6, 221);
-        Color borderColor = new Color(198, 112, 230, 216);
+        Color fillColor = new Color(227, 91, 91, 221);
+        Color borderColor = new Color(214, 96, 109, 216);
 
         String[] otherObjectsLSIClasses = {
             // Other cool things
