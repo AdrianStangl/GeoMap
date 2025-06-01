@@ -485,9 +485,11 @@ public class MapRenderer {
             }
         }
         else if (feature.geometry() instanceof Point)
-            return;  // TODO handle points
+            drawPolygon(feature.geometry().buffer(0.000001), fillColor, borderColor);
         else if (feature.geometry() instanceof MultiPoint)
-            return;
+            for (int i = 0; i < feature.geometry().getNumGeometries(); i++) {
+                drawPolygon(feature.geometry().buffer(0.000001), fillColor, borderColor);
+            }
         else
             System.out.println("Instance of " + feature.geometry().getClass().getName() + " is not supported");
     }
