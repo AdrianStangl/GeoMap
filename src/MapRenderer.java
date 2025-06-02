@@ -3,11 +3,8 @@ import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -15,8 +12,6 @@ import java.util.List;
 import com.vividsolutions.jts.geom.*;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
-import com.vividsolutions.jts.io.WKBReader;
-import com.vividsolutions.jts.io.WKBWriter;
 import fu.keys.LSIClassCentreDB;
 
 /**
@@ -65,17 +60,12 @@ public class MapRenderer {
 
     public void drawMap(Connection connection, DataFetcher fetcher) throws Exception {
         drawBackground();
-        // drawAreas(connection);
-        // drawLines(connection);
         drawWater(connection, fetcher);
         drawGeology(connection, fetcher);
         drawVegetation(connection, fetcher);
         drawResidential(connection, fetcher);
-        //drawCommercial(connection, fetcher);
         drawOpenarea(connection, fetcher);
         drawOthers(connection, fetcher);
-        //markStuff(fetcher.getFeaturesByLsiClass(connection, "UNDEF"));
-        // renderer.drawPoints(connection);
 
         drawableFeatures.sort(Comparator.comparingDouble((DrawableFeature df) -> df.feature().area()).reversed());
 
@@ -223,8 +213,6 @@ public class MapRenderer {
         for (DomainFeature protectedFeature : protectGeoms)
             if(protectedFeature.realname().contains("Landschaftsschutzgebiet Wöhrder See"))
                 waterGeoms.add(protectedFeature);
-
-        //waterGeoms.addAll(otherWater);  // TODO check waterland class
 
         LsiColorMap.ColorPair colorPair = LsiColorMap.getColor("WATER");
         Color fillColor = colorPair.fill();
@@ -543,16 +531,6 @@ public class MapRenderer {
         }
     }
 
-    public void markStuff(List<DomainFeature> stuff) throws Exception {
-        Color fillColor = new Color(229, 26, 236, 255);  // Cornflower Blue, semi-transparent
-        Color borderColor = new Color(255, 0, 234, 255);  // Darker blue
-        Color testColor = new Color(92, 80, 70, 240);
-
-        for (DomainFeature feature : stuff) {
-            addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0.0005);
-        }
-    }
-
     public void drawStreets(List<DomainFeature> streetGeoms) {
         Color fillColor = new Color(97, 91, 91, 255);  // Cornflower Blue, semi-transparent
         Color borderColor = new Color(43, 40, 40, 236);  // Darker blue
@@ -638,8 +616,6 @@ public class MapRenderer {
         return null;
     }
 
-
-
     private void addDomainFeatureToGlobalList(DomainFeature feature, Color fillColor, Color borderColor, double buffer){
         drawableFeatures.add(new DrawableFeature(feature,fillColor,borderColor, buffer));
     }
@@ -673,33 +649,6 @@ public class MapRenderer {
             }
         }
         return subset;
-    }
-
-    /**
-     * Zeichnet Punktobjekte (geometry='P')
-     */
-    public void drawPoints(Connection conn) throws Exception {
-        String sql =
-                "SELECT ST_AsEWKB(geom :: geometry), realname " +
-                        "FROM domain " +
-                        "WHERE geometry='P' AND ST_Within(geom :: geometry, ST_GeomFromWKB(?,4326))";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setBytes(1, new WKBWriter().write(target));
-            try (ResultSet rs = ps.executeQuery()) {
-                WKBReader reader = new WKBReader();
-                while (rs.next()) {
-                    byte[] wkb = rs.getBytes(1);
-                    String name = rs.getString(2);
-                    Geometry geom = reader.read(wkb);
-                    Coordinate c = geom.getCoordinate();
-                    int x = toPixelX(c.x), y = toPixelY(c.y);
-                    // Icon-Rendering oder einfacher Punkt
-                    g.setColor(Color.RED);
-                    g.fillOval(x-3, y-3, 6, 6);
-                    g.drawString(name, x+5, y-5);
-                }
-            }
-        }
     }
 
     /**
