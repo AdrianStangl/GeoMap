@@ -3,6 +3,7 @@ import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -31,7 +32,7 @@ public class MapRenderer {
     private final double scaleX;
     private final double scaleY;
 
-    private final int iconSize = 24; // Square icon size in pixels
+    private final int iconSize = 18; // Square icon size in pixels
 
     private List<DrawableFeature> drawableFeatures;
     private List<IconDrawInfo> iconDrawList = new ArrayList<>();
@@ -83,27 +84,89 @@ public class MapRenderer {
         }
 
         System.out.println("icon amount " + iconDrawList.size());
+        List<Rectangle> usedLabelAreas = new ArrayList<>();
+        List<Rectangle> usedIconAreas = new ArrayList<>();
+        Font font = new Font("SansSerif", Font.BOLD, 8);
+        g.setFont(font);
+        FontMetrics fm = g.getFontMetrics(font);
+
         for (IconDrawInfo icon : iconDrawList) {
             try {
                 BufferedImage img = ImageIO.read(new File(icon.iconPath()));
-                drawIconWithLabel(g, img, icon.x(), icon.y(), icon.width(), icon.height(), icon.label().contains("_") ? icon.label().substring(0, icon.label().indexOf('_')) : icon.label());
+                int x = icon.x();
+                int y = icon.y();
+                int width = icon.width();
+                int height = icon.height();
+
+                Rectangle iconBox = new Rectangle(x, y, width, height);
+                boolean overlapsAnotherIcon = usedIconAreas.stream().anyMatch(r -> r.intersects(iconBox));
+
+                if (overlapsAnotherIcon) {
+                    // Optionally skip drawing or try shifting (not yet implemented)
+                    continue;
+                }
+
+                // Draw icon only if it doesn’t overlap
+                g.drawImage(img, x, y, width, height, null);
+                usedIconAreas.add(iconBox);
+
+                // Label logic
+                String label = cleanRealName(icon.label());
+                int textWidth = fm.stringWidth(label);
+                int textHeight = fm.getHeight();
+
+                int baseX = x + (width - textWidth) / 2;
+                int baseY = y + height + textHeight;
+
+                int[][] offsets = {
+                        {0, 0},                             // below
+                        {0, -textHeight - 4},              // above
+                        {-textWidth - 5, 0},               // left
+                        {textWidth + 5, 0},                // right
+                        {-textWidth / 2, textHeight + 4},  // bottom-left
+                        {textWidth / 2, textHeight + 4},   // bottom-right
+                };
+
+                boolean placed = false;
+                for (int[] offset : offsets) {
+                    int tx = baseX + offset[0];
+                    int ty = baseY + offset[1];
+                    Rectangle labelBox = new Rectangle(tx, ty - textHeight, textWidth, textHeight);
+
+                    boolean overlapsIcon = usedIconAreas.stream().anyMatch(r -> r.intersects(labelBox));
+                    boolean overlapsLabel = usedLabelAreas.stream().anyMatch(r -> r.intersects(labelBox));
+
+                    if (!overlapsIcon && !overlapsLabel) {
+                        drawLabel(g, label, tx + textWidth / 2, ty - textHeight + fm.getAscent());
+                        usedLabelAreas.add(labelBox);
+                        placed = true;
+                        break;
+                    }
+                }
+
             } catch (IOException e) {
                 System.err.println("Could not load icon: " + icon.iconPath());
             }
         }
     }
 
-    private void drawIconWithLabel(Graphics2D g, BufferedImage icon, int x, int y, int width, int height, String label) {
+        private void drawIconWithLabel(Graphics2D g, BufferedImage icon, int x, int y, int width, int height, String label) {
         // Icon zeichnen (zentriert um x/y)
         g.drawImage(icon, x, y, width, height, null);
 
-        // Text vorbereiten
-        Font font = new Font("SansSerif", Font.BOLD, 10);
+        // Label unter dem Icon zeichnen
+        int labelX = x + width / 2;
+        int labelY = y + height + 2;
+        drawLabel(g, label, labelX, labelY);
+    }
+
+    private void drawLabel(Graphics2D g, String label, int centerX, int baselineY) {
+        Font font = new Font("SansSerif", Font.BOLD, 8);
         g.setFont(font);
         FontMetrics metrics = g.getFontMetrics(font);
 
-        int textX = x + width / 2 - metrics.stringWidth(label) / 2;
-        int textY = y + height + metrics.getAscent() + 2;
+        int textX = centerX - metrics.stringWidth(label) / 2;
+        int textY = baselineY + metrics.getAscent();
 
         // Schatten (schwarz)
         g.setColor(Color.BLACK);
@@ -462,7 +525,7 @@ public class MapRenderer {
         };
 
         for (String lsiClassName : otherObjectsLSIClasses) {
-            drawFeatureSubSet(otherGeoms, lsiClassName, fillColor, borderColor, 0.000025);
+            drawFeatureSubSet(otherGeoms, lsiClassName, fillColor, borderColor, 0.00002);
         }
 
         // Do not draw water here since already in draw water, just extract
@@ -530,35 +593,49 @@ public class MapRenderer {
             System.out.println("Instance of " + feature.geometry().getClass().getName() + " is not supported");
 
         int lsiClass = feature.lsiclass1();
-        String[] iconName = new String[1];
-        if (shouldDisplayIcon(lsiClass, iconName)) {
+        String label = "";
+        IconDisplayInfo displayInfo = getIconDisplayInfo(lsiClass);
+        if (displayInfo != null) {
             Coordinate center = feature.geometry().getCentroid().getCoordinate();
             int iconX = toPixelX(center.x) - iconSize / 2; // center with 24px icon
             int iconY = toPixelY(center.y) - iconSize / 2;
+            if(displayInfo.display())
+                label = feature.realname();
 
             iconDrawList.add(new IconDrawInfo(
-                    "icons/" + iconName[0] + ".png",
-                    iconX, iconY, iconSize, iconSize, feature.realname()
+                    "icons/" + displayInfo.icon() + ".png",
+                    iconX, iconY, iconSize, iconSize, label
             ));
         }
     }
 
-    private boolean shouldDisplayIcon(int lsiClass, String[] iconNameOut) {
-        iconNameOut[0] = null;
-
-        if (lsiClass == 93120000) //{
-            iconNameOut[0] = "fontain";
-//        } else if (lsiClass == 93130000) {
-//            iconNameOut[0] = "spielplatz";
-//        } else if (lsiClass == 21000000) {
-//            iconNameOut[0] = "park";
-//        } else if (lsiClass == 24110000) {
-//            iconNameOut[0] = "haltestelle";
-//        } else if (lsiClass == 74100000) {
-//            iconNameOut[0] = "toilets";
-//        }
-
-        return iconNameOut[0] != null;
+    private IconDisplayInfo getIconDisplayInfo(int lsiClass) {
+        if (lsiClass == 93120000) {
+            return new IconDisplayInfo("fontain", true);
+        } else if (lsiClass == 32115000) {
+            return new IconDisplayInfo("taxi", false);
+        } else if (lsiClass == 21000000) {
+            return new IconDisplayInfo("park", false);
+        } else if (lsiClass == 32116000 || lsiClass == 32117000) {
+            return new IconDisplayInfo("parkinglot_bike", false);
+        } else if (lsiClass >= 32110000 && lsiClass <= 32130000) {
+            return new IconDisplayInfo("parkinglot", false);
+        } else if (lsiClass >= 32140000 && lsiClass <= 32143000) {
+            return new IconDisplayInfo("parking_house", false);
+        } else if (lsiClass == 92330000 || lsiClass >= 31110000 && lsiClass <= 31113000) {
+            return new IconDisplayInfo("park", true);
+        } else if (lsiClass == 20211000) {
+            return new IconDisplayInfo("university", true);  // Uni
+        } else if (lsiClass == 32440000) {
+            return new IconDisplayInfo("station", true);
+        } else if (lsiClass >= 32410000 && lsiClass <= 32430000) {
+            return new IconDisplayInfo("station", false);
+        } else if (lsiClass >= 20501240 && lsiClass <= 20501247) {  // Only small restaurant subset, to many otherwise
+            return new IconDisplayInfo("restaurant", true);
+        }else if (lsiClass >= 20212000 && lsiClass <= 20214100) {  // schools
+            return new IconDisplayInfo("school", true);
+        }
+        return null;
     }
 
 
@@ -631,4 +708,10 @@ public class MapRenderer {
     public void saveImage(String filename) throws Exception {
         ImageIO.write(image, "PNG", new File(filename));
     }
+
+    private String cleanRealName(String name) {
+        int idx = name.indexOf('_');
+        return (idx >= 0) ? name.substring(0, idx) : name;
+    }
 }
+
