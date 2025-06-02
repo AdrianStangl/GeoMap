@@ -28,9 +28,11 @@ public class MapRenderer {
     private final double scaleY;
 
     private final int iconSize = 18; // Square icon size in pixels
+    private final int globalFontsize = 12;
 
     private List<DrawableFeature> drawableFeatures;
     private List<IconDrawInfo> iconDrawList = new ArrayList<>();
+    private List<IconDrawInfo> labelOnlyList = new ArrayList<>();
 
     public MapRenderer(Connection conn, Geometry targetSquare,
                        int pxWidth, int pxHeight) throws Exception {
@@ -74,97 +76,112 @@ public class MapRenderer {
         }
 
         System.out.println("icon amount " + iconDrawList.size());
+
         List<Rectangle> usedLabelAreas = new ArrayList<>();
         List<Rectangle> usedIconAreas = new ArrayList<>();
-        Font font = new Font("SansSerif", Font.BOLD, 8);
+        Font font = new Font("SansSerif", Font.BOLD, 10);
         g.setFont(font);
         FontMetrics fm = g.getFontMetrics(font);
 
-        for (IconDrawInfo icon : iconDrawList) {
+        for (IconDrawInfo info : iconDrawList) {
+            String label = cleanRealName(info.label());
+            int iconW = info.width();
+            int iconH = info.height();
+
             try {
-                BufferedImage img = ImageIO.read(new File(icon.iconPath()));
-                int x = icon.x();
-                int y = icon.y();
-                int width = icon.width();
-                int height = icon.height();
-
-                Rectangle iconBox = new Rectangle(x, y, width, height);
-                boolean overlapsAnotherIcon = usedIconAreas.stream().anyMatch(r -> r.intersects(iconBox));
-
-                if (overlapsAnotherIcon) {
-                    // Optionally skip drawing or try shifting (not yet implemented)
-                    continue;
-                }
-
-                // Draw icon only if it doesn’t overlap
-                g.drawImage(img, x, y, width, height, null);
-                usedIconAreas.add(iconBox);
-
-                // Label logic
-                String label = cleanRealName(icon.label());
-                int textWidth = fm.stringWidth(label);
-                int textHeight = fm.getHeight();
-
-                int baseX = x + (width - textWidth) / 2;
-                int baseY = y + height + textHeight;
+                BufferedImage img = ImageIO.read(new File(info.iconPath()));
 
                 int[][] offsets = {
-                        {0, 0},                             // below
-                        {0, -textHeight - 4},              // above
-                        {-textWidth - 5, 0},               // left
-                        {textWidth + 5, 0},                // right
-                        {-textWidth / 2, textHeight + 4},  // bottom-left
-                        {textWidth / 2, textHeight + 4},   // bottom-right
+                        {0, 0},
+                        {4, 0}, {-4, 0}, {0, 4}, {0, -4},
+                        {4, 4}, {-4, -4}, {6, 0}, {0, 6}
                 };
 
                 boolean placed = false;
                 for (int[] offset : offsets) {
-                    int tx = baseX + offset[0];
-                    int ty = baseY + offset[1];
-                    Rectangle labelBox = new Rectangle(tx, ty - textHeight, textWidth, textHeight);
+                    int x = info.x() + offset[0];
+                    int y = info.y() + offset[1];
 
-                    boolean overlapsIcon = usedIconAreas.stream().anyMatch(r -> r.intersects(labelBox));
+                    Rectangle iconBox = new Rectangle(x, y, iconW, iconH);
+
+                    int textWidth = fm.stringWidth(label);
+                    int textHeight = fm.getHeight();
+                    int labelX = x + iconW / 2;
+                    int labelY = y + iconH + 2;
+                    Rectangle labelBox = new Rectangle(labelX - textWidth / 2, labelY - textHeight, textWidth, textHeight);
+
+                    boolean overlapsIcon = usedIconAreas.stream().anyMatch(r -> r.intersects(iconBox));
                     boolean overlapsLabel = usedLabelAreas.stream().anyMatch(r -> r.intersects(labelBox));
+                    boolean labelOverIcon = usedIconAreas.stream().anyMatch(r -> r.intersects(labelBox));
 
-                    if (!overlapsIcon && !overlapsLabel) {
-                        drawLabel(g, label, tx + textWidth / 2, ty - textHeight + fm.getAscent());
+                    if (!overlapsIcon && !overlapsLabel && !labelOverIcon) {
+                        g.drawImage(img, x, y, iconW, iconH, null);
+                        drawLabel(g, label, labelX, labelY);
+                        usedIconAreas.add(iconBox);
                         usedLabelAreas.add(labelBox);
                         placed = true;
                         break;
                     }
                 }
 
+                if (!placed) {
+                    System.out.println("Skipped icon+label: " + label);
+                }
+
             } catch (IOException e) {
-                System.err.println("Could not load icon: " + icon.iconPath());
+                System.err.println("Could not load icon: " + info.iconPath());
+            }
+        }
+
+        // Handle label-only entries (label placement tries multiple offsets)
+        for (IconDrawInfo labelOnly : labelOnlyList) {
+            String label = cleanRealName(labelOnly.label());
+            placeAndDrawLabel(g, label, labelOnly.x(), labelOnly.y(), usedIconAreas, usedLabelAreas, fm);
+        }
+    }
+
+    private void placeAndDrawLabel(Graphics2D g, String label, int centerX, int baselineY,
+                                   List<Rectangle> usedIconAreas, List<Rectangle> usedLabelAreas, FontMetrics fm) {
+        int textWidth = fm.stringWidth(label);
+        int textHeight = fm.getHeight();
+
+        int[][] offsets = {
+                {0, 0},                             // below
+                {0, -textHeight - 4},              // above
+                {-textWidth - 5, 0},               // left
+                {textWidth + 5, 0},                // right
+                {-textWidth / 2, textHeight + 4},  // bottom-left
+                {textWidth / 2, textHeight + 4},   // bottom-right
+        };
+
+        for (int[] offset : offsets) {
+            int tx = centerX + offset[0] - textWidth / 2;
+            int ty = baselineY + offset[1];
+            Rectangle labelBox = new Rectangle(tx, ty - textHeight, textWidth, textHeight);
+
+            boolean overlapsIcon = usedIconAreas.stream().anyMatch(r -> r.intersects(labelBox));
+            boolean overlapsLabel = usedLabelAreas.stream().anyMatch(r -> r.intersects(labelBox));
+
+            if (!overlapsIcon && !overlapsLabel) {
+                drawLabel(g, label, centerX + offset[0], ty);
+                usedLabelAreas.add(labelBox);
+                return;
             }
         }
     }
 
-        private void drawIconWithLabel(Graphics2D g, BufferedImage icon, int x, int y, int width, int height, String label) {
-        // Icon zeichnen (zentriert um x/y)
-        g.drawImage(icon, x, y, width, height, null);
-
-        // Label unter dem Icon zeichnen
-        int labelX = x + width / 2;
-        int labelY = y + height + 2;
-        drawLabel(g, label, labelX, labelY);
-    }
-
     private void drawLabel(Graphics2D g, String label, int centerX, int baselineY) {
-        Font font = new Font("SansSerif", Font.BOLD, 8);
+        Font font = new Font("SansSerif", Font.BOLD, globalFontsize);
         g.setFont(font);
         FontMetrics metrics = g.getFontMetrics(font);
 
         int textX = centerX - metrics.stringWidth(label) / 2;
         int textY = baselineY + metrics.getAscent();
 
-        // Schatten (schwarz)
         g.setColor(Color.BLACK);
-        g.drawString(label, textX + 1, textY + 1);
-
-        // Vordergrund (weiß)
+        g.drawString(label, textX + 1, textY + 1); // Shadow
         g.setColor(Color.WHITE);
-        g.drawString(label, textX, textY);
+        g.drawString(label, textX, textY);         // Foreground
     }
 
 
@@ -570,6 +587,7 @@ public class MapRenderer {
         else
             System.out.println("Instance of " + feature.geometry().getClass().getName() + " is not supported");
 
+        // Add icons and or labels  to icondrawlist
         int lsiClass = feature.lsiclass1();
         String label = "";
         IconDisplayInfo displayInfo = getIconDisplayInfo(lsiClass);
@@ -584,6 +602,14 @@ public class MapRenderer {
                     "icons/" + displayInfo.icon() + ".png",
                     iconX, iconY, iconSize, iconSize, label
             ));
+        }
+
+        // Add zoo things to labelOnlyList
+        if(feature.lsiclass1() == 93140000 && feature.tags().contains("attraction=animal") && !feature.realname().equals("Leer")){
+            Coordinate center = feature.geometry().getCentroid().getCoordinate();
+            int labelX = toPixelX(center.x);
+            int labelY = toPixelY(center.y);
+            labelOnlyList.add(new IconDrawInfo(null, labelX, labelY, 0, 0, feature.realname()));
         }
     }
 
