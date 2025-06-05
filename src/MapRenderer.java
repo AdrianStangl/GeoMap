@@ -79,7 +79,8 @@ public class MapRenderer {
 
         List<Rectangle> usedLabelAreas = new ArrayList<>();
         List<Rectangle> usedIconAreas = new ArrayList<>();
-        Font font = new Font("SansSerif", Font.BOLD, 10);
+
+        Font font = new Font("SansSerif", Font.BOLD, globalFontsize);
         g.setFont(font);
         FontMetrics fm = g.getFontMetrics(font);
 
@@ -98,6 +99,7 @@ public class MapRenderer {
                 };
 
                 boolean placed = false;
+
                 for (int[] offset : offsets) {
                     int x = info.x() + offset[0];
                     int y = info.y() + offset[1];
@@ -105,18 +107,33 @@ public class MapRenderer {
                     Rectangle iconBox = new Rectangle(x, y, iconW, iconH);
 
                     int textWidth = fm.stringWidth(label);
-                    int textHeight = fm.getHeight();
-                    int labelX = x + iconW / 2;
-                    int labelY = y + iconH + 2;
-                    Rectangle labelBox = new Rectangle(labelX - textWidth / 2, labelY - textHeight, textWidth, textHeight);
+                    int textAscent = fm.getAscent();
+                    int textHeight = fm.getHeight(); // used for the full bounding box if needed
 
+                    int labelPadding = 12;
+                    int labelX = x + iconW / 2;
+                    int labelY = y + iconH + labelPadding;
+
+                    int labelBoxX = labelX - textWidth / 2;
+                    int labelBoxY = labelY - textAscent;
+
+                    Rectangle labelBox = new Rectangle(labelBoxX, labelBoxY, textWidth, textHeight);
+
+                    // Debug draw label box
+//                    g.setColor(new Color(150, 150, 150, 50)); // semi-transparent fill
+//                    g.fillRect(labelBox.x, labelBox.y, labelBox.width, labelBox.height);
+//                    g.setColor(Color.DARK_GRAY); // border
+//                    g.drawRect(labelBox.x, labelBox.y, labelBox.width, labelBox.height);
+
+                    // Overlap check
                     boolean overlapsIcon = usedIconAreas.stream().anyMatch(r -> r.intersects(iconBox));
                     boolean overlapsLabel = usedLabelAreas.stream().anyMatch(r -> r.intersects(labelBox));
+                    boolean iconOverLabel = usedLabelAreas.stream().anyMatch(r -> r.intersects(iconBox));
                     boolean labelOverIcon = usedIconAreas.stream().anyMatch(r -> r.intersects(labelBox));
 
-                    if (!overlapsIcon && !overlapsLabel && !labelOverIcon) {
+                    if (!overlapsIcon && !overlapsLabel && !iconOverLabel && !labelOverIcon) {
                         g.drawImage(img, x, y, iconW, iconH, null);
-                        drawLabel(g, label, labelX, labelY);
+                        drawLabel(g, label, labelX, labelY, fm); // pass in fm for consistency
                         usedIconAreas.add(iconBox);
                         usedLabelAreas.add(labelBox);
                         placed = true;
@@ -133,7 +150,7 @@ public class MapRenderer {
             }
         }
 
-        // Handle label-only entries (label placement tries multiple offsets)
+        // Handle label-only entries
         for (IconDrawInfo labelOnly : labelOnlyList) {
             String label = cleanRealName(labelOnly.label());
             placeAndDrawLabel(g, label, labelOnly.x(), labelOnly.y(), usedIconAreas, usedLabelAreas, fm);
@@ -163,20 +180,16 @@ public class MapRenderer {
             boolean overlapsLabel = usedLabelAreas.stream().anyMatch(r -> r.intersects(labelBox));
 
             if (!overlapsIcon && !overlapsLabel) {
-                drawLabel(g, label, centerX + offset[0], ty);
+                drawLabel(g, label, centerX + offset[0], ty, fm);
                 usedLabelAreas.add(labelBox);
                 return;
             }
         }
     }
 
-    private void drawLabel(Graphics2D g, String label, int centerX, int baselineY) {
-        Font font = new Font("SansSerif", Font.BOLD, globalFontsize);
-        g.setFont(font);
-        FontMetrics metrics = g.getFontMetrics(font);
-
+    private void drawLabel(Graphics2D g, String label, int centerX, int baselineY, FontMetrics metrics) {
         int textX = centerX - metrics.stringWidth(label) / 2;
-        int textY = baselineY + metrics.getAscent();
+        int textY = baselineY;
 
         g.setColor(Color.BLACK);
         g.drawString(label, textX + 1, textY + 1); // Shadow
@@ -636,8 +649,10 @@ public class MapRenderer {
             return new IconDisplayInfo("station", false);
         } else if (lsiClass >= 20501240 && lsiClass <= 20501247) {  // Only small restaurant subset, to many otherwise
             return new IconDisplayInfo("restaurant", true);
-        }else if (lsiClass >= 20212000 && lsiClass <= 20214100) {  // schools
+        } else if (lsiClass >= 20212000 && lsiClass <= 20214100) {  // schools
             return new IconDisplayInfo("school", true);
+        } else if (lsiClass == 92100000 ) {  // schools
+            return new IconDisplayInfo("construction", false);
         }
         return null;
     }
