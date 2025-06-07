@@ -84,6 +84,20 @@ public class MapRenderer {
         g.setFont(font);
         FontMetrics fm = g.getFontMetrics(font);
 
+
+        DrawIconsAndLabels(fm, usedIconAreas, usedLabelAreas);
+        DrawLabels(usedIconAreas, usedLabelAreas, fm);
+    }
+
+    private void DrawLabels(List<Rectangle> usedIconAreas, List<Rectangle> usedLabelAreas, FontMetrics fm) {
+        // Handle label-only entries
+        for (IconDrawInfo labelOnly : labelOnlyList) {
+            String label = cleanRealName(labelOnly.label());
+            placeAndDrawLabel(g, label, labelOnly.x(), labelOnly.y(), usedIconAreas, usedLabelAreas, fm);
+        }
+    }
+
+    private void DrawIconsAndLabels(FontMetrics fm, List<Rectangle> usedIconAreas, List<Rectangle> usedLabelAreas) {
         for (IconDrawInfo info : iconDrawList) {
             String label = cleanRealName(info.label());
             int iconW = info.width();
@@ -148,12 +162,6 @@ public class MapRenderer {
             } catch (IOException e) {
                 System.err.println("Could not load icon: " + info.iconPath());
             }
-        }
-
-        // Handle label-only entries
-        for (IconDrawInfo labelOnly : labelOnlyList) {
-            String label = cleanRealName(labelOnly.label());
-            placeAndDrawLabel(g, label, labelOnly.x(), labelOnly.y(), usedIconAreas, usedLabelAreas, fm);
         }
     }
 
@@ -292,123 +300,12 @@ public class MapRenderer {
         }
     }
 
-    public void drawCommercial(Connection connection, DataFetcher fetcher) throws Exception {
-        List<DomainFeature> commercialGeoms = fetcher.getFeaturesByLsiClass(connection, "COMMERCIAL", null, false);
-        Color fillColor = new Color(207, 73, 114, 180);  // Cornflower Blue, semi-transparent
-        Color borderColor = new Color(159, 11, 46, 236);  // Darker blue
-
-        String[] commercialLSIClasses = {
-                // Commercial
-                // Every gastronomie
-                "GASTRONOMY",
-                // Every shop
-                "SHOP_MORE", "LESEN_SCHREIBEN", "BAUEN_EINRICHTEN_GARTEN",
-                "ELEKTRONIKSHOP", "SPORT_FREIZEIT_SHOP", "KLEIDUNG",
-                "KOERPERPFLEGE", "LEBENSMITTEL",
-                "SHOP",
-                // Every Handwerk
-                "HANDWERK",
-                // Sonstige  commercial ober kategorien
-                "DIENSTLEISTUNG_AUTO", "FINANZEINRICHTUNG" , "POST",
-                "COMMUNICATION", "TOILETS", "UNTERHALTUNG_KOMMERZIELL",
-                "NACHTLEBEN", "WEITERE_DIENSTLEISTUNGEN", "UEBERNACHTUNGEN",
-
-                "BEHOERDE",
-                // Medical
-                "KRANKENHAUS", "APOTHEKE", "ARZTPRAXIS",
-                "MEDICAL",
-
-                "SOCIAL_RELIGIOES",
-                // Freizeit
-                "UNTERHALTUNGSGEBAEUDE", "TIERPARK" , "FREIZEIT",
-                // Laendlich
-                "LAENDLICH",
-
-                // Remaining non listed commercial things
-                "COMMERCIAL"
-        };
-
-        for (String lsiClassName : commercialLSIClasses){
-            drawFeatureSubSet(commercialGeoms, lsiClassName, fillColor, borderColor, 0.00001);
-        }
-
-        for (DomainFeature feature : commercialGeoms) {
-            addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0);
-        }
-    }
-
     public void drawResidential(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> residentialGeoms = fetcher.getFeaturesByLsiClass(connection, "INHABITED", null, false);
         Color fillColor = new Color(149, 6, 49, 180);
         Color borderColor = new Color(87, 2, 21, 236);
 
-        String[] residentialLSIClasses = {
-                // Residential
-                "GEWAECHSHAUS", "UNTERSTAND", "HUT",
-                "SHED", "BARN_BUILDING", "FARM_BUILDING",
-                "SCHOOL_BUILDING", "COMMERCIAL_BUILDING", "INDUSTRIAL_BUILDING",
-                "DETACHED", "TERRACE", "APPARTEMENTS",
-                "GARAGES", "GARAGE", "CARPORT",
-                "HOUSE", "RESIDENTIAL_BUILDING", "BUILDING",
-                "RESIDENTIAL",
-
-                // Academic
-                "ASTRONOMIE", "RESEARCH", "LIBRARY",
-                "BESONDERE_SCHULE", "BERUFSSCHULE", "GRUNDSCHULE",
-                "HAUPTSCHULE", "REALSCHULE", "GYMNASIUM",
-                "UNIVERSITY", "ACADEMIC",
-
-                "MELDUNGSEINRICHTUNGEN",
-                "ROHRLEITUNG",
-
-                // Wasseraufbereitung
-                "KLAERWERK", "WASSERTURM", "WASSERHOCHBEHAELTER",
-                "STAUDAMM", "RESERVOIR", "BASIN",
-                "BRUNNEN", "WASSERWERK", "WASSERAUFBEREITUNG",
-
-                // Power plant addon
-                "TRANSFORMATOR", "TRAFOHAUS", "STROMVERTEILER",
-                "STROMLEITUNG", "STROMMAST", "WASSERRAD",
-                "UMSPANNSTATION", "POWER_PLANT_ADDON",
-                // Power plants
-                "MUEHLE", "WASSER_KRAFTWERK", "SOLAR_KRAFTWERK",
-                "WINDMUEHLE", "WINDKRAFTWERK", "BRENN_POWER_PLANT",
-                "KOHLE_KRAFTWERK", "OEL_KRAFTWERK", "GAS_KRAFTWERK",
-                "POWER_PLANT",
-                // Remaining industrial stuff
-                "MINING", "INDUSTRIAL",
-
-                // Commercial
-                // Every gastronomie
-                "GASTRONOMY",
-                // Every shop
-                "SHOP_MORE", "LESEN_SCHREIBEN", "BAUEN_EINRICHTEN_GARTEN",
-                "ELEKTRONIKSHOP", "SPORT_FREIZEIT_SHOP", "KLEIDUNG",
-                "KOERPERPFLEGE", "LEBENSMITTEL",
-                "SHOP",
-                // Every Handwerk
-                "HANDWERK",
-                // Sonstige  commercial ober kategorien
-                "DIENSTLEISTUNG_AUTO", "FINANZEINRICHTUNG" , "POST",
-                "COMMUNICATION", "TOILETS", "UNTERHALTUNG_KOMMERZIELL",
-                "NACHTLEBEN", "WEITERE_DIENSTLEISTUNGEN", "UEBERNACHTUNGEN",
-
-                "BEHOERDE",
-                // Medical
-                "KRANKENHAUS", "APOTHEKE", "ARZTPRAXIS",
-                "MEDICAL",
-
-                "SOCIAL_RELIGIOES",
-                // Freizeit
-                "UNTERHALTUNGSGEBAEUDE", "TIERPARK" , "FREIZEIT",
-                // Laendlich
-                "LAENDLICH",
-
-                // Remaining non listed commercial things
-                "COMMERCIAL"
-        };
-
-        for (String lsiClassName : residentialLSIClasses){
+        for (String lsiClassName : LSIClassGroups.RESIDENTIAL){
             drawFeatureSubSet(residentialGeoms, lsiClassName, fillColor, borderColor, 0.00002);
         }
 
@@ -441,45 +338,11 @@ public class MapRenderer {
         Color haltestelleFillColor = new Color(168, 134, 134, 255);
         drawFeatureSubSet(openareaGeoms, "HALTESTELLE", haltestelleFillColor, haltestelleFillColor, 0.00001);
 
-
-        String[] residentialLSIClasses = {
-                // Residential
-                "MUELLDEPONIE",
-                "UBAHN_GLEISE", "BAHNKONTROLLZENTRUM",
-                "BAHNVERKEHR",
-                "BRIDGE", "BRIDGE_RELATION",
-                "STRASSENLAMPE", "BOOTSVERLEIH", "HAFEN_ALL",
-                "HUBSCHRAUBER_LANDEPLATZ", "FLUGHAFEN",
-
-                "BUSBAHNHOF", "BUSHALTESTELLE", "U_BAHN_HALTESTELLE",
-                "TRAM_HALTESTELLE", "HALTESTELLE", "BAHNHOF",
-
-                "PARKHAUS", "RASTPLATZ", "RASTSTAETTE",
-                "ALLGEMEINER_PARKPLATZ",
-
-                "WERTSTOFFSAMMELSTELLE", "SCHWIMMBAD_ALL",
-
-                "KLETTERN", "RENNBAHN", "GOLFPLATZ",
-                "BASKETBALL_FELD", "BOWLING", "TISCHTENNIS",
-                "MINIGOLF", "RUDERN", "FAHRRADFAHREN",
-                "BEACHVOLLEYBALL", "HANDBALL", "BOGENSCHIESSEN",
-                "MODELLFLUG", "FUSSBALL", "REITEN",
-                "TENNISPLATZ", "SPORTPLATZ", "STADION",
-                "SPORTS_PLACE", // remaning places
-
-                "GRUENFLAECHE", "NAHERHOLUNGSGEBIET", "CAMPINGPLATZ",
-                "SPIELPLATZ", "HUNDEPARK", "GRILLSTELLE",
-                "PICNIC_PLATZ", "GARTEN", "PARK",
-                "GENERAL_PUBLIC_PLACE",
-                "PUBLIC_PLACE", // Remaining things
-        };
-
-        for (String lsiClassName : residentialLSIClasses){
+        for (String lsiClassName : LSIClassGroups.OPENAREAS){
             drawFeatureSubSet(openareaGeoms, lsiClassName, fillColor, borderColor, 0.00002);
         }
 
         // Extract and draw streets
-        // TODO Brücken nicht entfernen -> Upper bound anpassen
         int[] trashLSIBoundaries = LSIClassCentreDB.lsiClassRange("TRAFFIC_MORE");
         List<DomainFeature> trash = extractLSISubSet(openareaGeoms, trashLSIBoundaries[0], trashLSIBoundaries[1]);
         trashLSIBoundaries = LSIClassCentreDB.lsiClassRange("BAHNSTEIG");
@@ -523,26 +386,7 @@ public class MapRenderer {
         Color fillColor = new Color(227, 91, 91, 221);
         Color borderColor = new Color(214, 96, 109, 216);
 
-        String[] otherObjectsLSIClasses = {
-            // Other cool things
-            "SITZBANK", "MUELLEIMER", "VERKAUFSAUTOMAT",
-            // Tower
-            "BEOBACHTUNGSTURM", "TURM", "BEGRENZUNG",
-            // Sight points
-            "ZIERBRUNNEN", "DENKMAL", "SIGHT_POINT",
-            // Historic things
-            "SCHLOSS", "RUINE", "SCHLOSS",
-            "STADTMAUER", "STADTTOR", "HISTORIC",
-            // Protected areas
-            "NATIONALPARK", "NATURSCHUTZGEBIET",
-            // Security and military
-            "POLIZEI", "GEFAENGNIS", "FEUERWEHR",
-            "MILITARY", "BUILDINGS_SPECIAL_USAGE",
-            // Include construction works since many building are in this category...
-            "BAUSTELLE"
-        };
-
-        for (String lsiClassName : otherObjectsLSIClasses) {
+        for (String lsiClassName : LSIClassGroups.OTHER) {
             drawFeatureSubSet(otherGeoms, lsiClassName, fillColor, borderColor, 0.00002);
         }
 
