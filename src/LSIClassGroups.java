@@ -116,4 +116,23 @@ public class LSIClassGroups {
         // Include construction works since many building are in this category...
         "BAUSTELLE"
     };
+
+    public static final String[] VEGETATION = {
+        // single vegetation objects
+        "HECKE", "BAUMREIHE", "EINZELNER_BAUM",
+        "VEGETATION_SINGLE_OBJECT",
+
+        "GRASFLAECHE", "FEUCHTWIESE", "SUMPF",
+
+        // Agriculture
+        "ACKERLAND", "OBST_ANBAUFLAECHE", "WEINBERG",
+        "WEIDELAND",
+        "AGRICULTURAL",
+
+        // Forest
+        "LAUBWALD", "NADELWALD", "MISCHWALD",
+        "BUSCHWERK" , "WALD",
+        // Rest of the vegetation
+        "VEGETATION"
+    };
 }

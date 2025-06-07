@@ -234,7 +234,7 @@ public class MapRenderer {
             if (first) { path.moveTo(x,y); first = false; }
             else      path.lineTo(x,y);
         }
-        // g.setStroke(new BasicStroke(3.0f));
+        
         g.setColor(borderColor);
         g.draw(path);
     }
@@ -269,29 +269,10 @@ public class MapRenderer {
     public void drawVegetation(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> vegetationGeoms = fetcher.getFeaturesByLsiClass(connection, "VEGETATION", null, false);
 
-        Color fillColor = new Color(42, 195, 20, 255);  // Cornflower Blue, semi-transparent
-        Color borderColor = new Color(39, 181, 21, 255);  // Darker blue
+        Color fillColor = new Color(42, 195, 20, 255);
+        Color borderColor = new Color(39, 181, 21, 255);
 
-        String[] vegetationLSIClasses = {
-            // single vegetation objects
-            "HECKE", "BAUMREIHE", "EINZELNER_BAUM",
-            "VEGETATION_SINGLE_OBJECT",
-
-            "GRASFLAECHE", "FEUCHTWIESE", "SUMPF",
-
-            // Agriculture
-            "ACKERLAND", "OBST_ANBAUFLAECHE", "WEINBERG",
-            "WEIDELAND",
-            "AGRICULTURAL",
-
-            // Forest
-            "LAUBWALD", "NADELWALD", "MISCHWALD",
-            "BUSCHWERK" , "WALD",
-            // Rest of the vegetation
-            "VEGETATION"
-        };
-
-        for (String lsiClassName : vegetationLSIClasses) {
+        for (String lsiClassName : LSIClassGroups.VEGETATION) {
             drawFeatureSubSet(vegetationGeoms, lsiClassName, fillColor, borderColor, 0.00001);
         }
 
@@ -447,7 +428,7 @@ public class MapRenderer {
         // Add icons and or labels  to icondrawlist
         int lsiClass = feature.lsiclass1();
         String label = "";
-        IconDisplayInfo displayInfo = getIconDisplayInfo(lsiClass);
+        IconDisplayInfo displayInfo = LsiIconLabelMap.getIconDisplayInfo(lsiClass);
         if (displayInfo != null) {
             Coordinate center = feature.geometry().getCentroid().getCoordinate();
             int iconX = toPixelX(center.x) - iconSize / 2; // center with 24px icon
@@ -470,36 +451,6 @@ public class MapRenderer {
         }
     }
 
-    private IconDisplayInfo getIconDisplayInfo(int lsiClass) {
-        if (lsiClass == 93120000) {
-            return new IconDisplayInfo("fontain", true);
-        } else if (lsiClass == 32115000) {
-            return new IconDisplayInfo("taxi", false);
-        } else if (lsiClass == 21000000) {
-            return new IconDisplayInfo("park", false);
-        } else if (lsiClass == 32116000 || lsiClass == 32117000) {
-            return new IconDisplayInfo("parkinglot_bike", false);
-        } else if (lsiClass >= 32110000 && lsiClass <= 32130000) {
-            return new IconDisplayInfo("parkinglot", false);
-        } else if (lsiClass >= 32140000 && lsiClass <= 32143000) {
-            return new IconDisplayInfo("parking_house", false);
-        } else if (lsiClass == 92330000 || lsiClass >= 31110000 && lsiClass <= 31113000) {
-            return new IconDisplayInfo("park", true);
-        } else if (lsiClass == 20211000) {
-            return new IconDisplayInfo("university", true);  // Uni
-        } else if (lsiClass == 32440000) {
-            return new IconDisplayInfo("station", true);
-        } else if (lsiClass >= 32410000 && lsiClass <= 32430000) {
-            return new IconDisplayInfo("station", false);
-        } else if (lsiClass >= 20501240 && lsiClass <= 20501247) {  // Only small restaurant subset, to many otherwise
-            return new IconDisplayInfo("restaurant", true);
-        } else if (lsiClass >= 20212000 && lsiClass <= 20214100) {  // schools
-            return new IconDisplayInfo("school", true);
-        } else if (lsiClass == 92100000 ) {  // schools
-            return new IconDisplayInfo("construction", false);
-        }
-        return null;
-    }
 
     private void addDomainFeatureToGlobalList(DomainFeature feature, Color fillColor, Color borderColor, double buffer){
         drawableFeatures.add(new DrawableFeature(feature,fillColor,borderColor, buffer));
