@@ -1,12 +1,13 @@
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
 import java.io.IOException;
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.Comparator;
+import java.util.*;
 import java.util.List;
 
 import com.vividsolutions.jts.geom.*;
@@ -33,6 +34,7 @@ public class MapRenderer {
     private List<DrawableFeature> drawableFeatures;
     private List<IconDrawInfo> iconDrawList = new ArrayList<>();
     private List<IconDrawInfo> labelOnlyList = new ArrayList<>();
+    private List<DomainFeature> streetFeatureList = new ArrayList<>();
 
     public MapRenderer(Connection conn, Geometry targetSquare,
                        int pxWidth, int pxHeight) throws Exception {
@@ -75,8 +77,6 @@ public class MapRenderer {
             drawDomainFeature(drawFeature.feature(), drawFeature.fillColor(), drawFeature.borderColor(), drawFeature.buffer());
         }
 
-        System.out.println("icon amount " + iconDrawList.size());
-
         List<Rectangle> usedLabelAreas = new ArrayList<>();
         List<Rectangle> usedIconAreas = new ArrayList<>();
 
@@ -84,10 +84,80 @@ public class MapRenderer {
         g.setFont(font);
         FontMetrics fm = g.getFontMetrics(font);
 
-
         DrawIconsAndLabels(fm, usedIconAreas, usedLabelAreas);
         DrawLabels(usedIconAreas, usedLabelAreas, fm);
+        DrawStreetLabels(g, fm);
     }
+
+    private void DrawStreetLabels(Graphics2D g2d, FontMetrics fm) {
+        double labelRadius = 200.0;
+        Map<String, List<Point2D>> labelPositions = new HashMap<>();
+
+        for (DomainFeature road : streetFeatureList) {
+            Geometry geom = road.geometry();
+
+            // Sicherstellen, dass es ein LineString ist
+            if (!(geom instanceof com.vividsolutions.jts.geom.LineString line)) continue;
+
+            Coordinate[] coords = line.getCoordinates();
+            if (coords.length < 2) continue;
+
+            // Mittelpunkt und Winkel bestimmen
+            Point2D labelPos = computeMidpoint(coords);
+            double angle = computeLocalAngle(coords);
+
+            // Prüfen, ob in der Nähe schon ein Label mit gleichem Namen ist
+            boolean tooClose = false;
+            for (Point2D existing : labelPositions.getOrDefault(road.realname(), List.of())) {
+                if (labelPos.distance(existing) < labelRadius) {
+                    tooClose = true;
+                    break;
+                }
+            }
+
+            // Wenn weit genug entfernt, Label zeichnen
+            if (!tooClose) {
+                System.out.println("Road: " + road.realname() + " has been drawn!");
+                drawRotatedLabel(g2d, road.realname(), labelPos, angle);
+                labelPositions.computeIfAbsent(road.realname(), k -> new ArrayList<>()).add(labelPos);
+            }
+        }
+    }
+
+    private Point2D computeMidpoint(Coordinate[] coords) {
+        int mid = coords.length / 2;
+        return new Point2D.Double(toPixelX(coords[mid].x), toPixelY(coords[mid].y));
+    }
+
+    private double computeLocalAngle(Coordinate[] coords) {
+        int mid = coords.length / 2;
+        int idx1 = Math.max(0, mid - 1);
+        int idx2 = Math.min(coords.length - 1, mid + 1);
+
+        double x1 = toPixelX(coords[idx1].x);
+        double y1 = toPixelY(coords[idx1].y);
+        double x2 = toPixelX(coords[idx2].x);
+        double y2 = toPixelY(coords[idx2].y);
+
+        double dx = x2 - x1;
+        double dy = y2 - y1;
+
+        return Math.atan2(dy, dx);
+    }
+
+    private void drawRotatedLabel(Graphics2D g2d, String text, Point2D position, double angle) {
+        AffineTransform old = g2d.getTransform();
+
+        g2d.translate(position.getX(), position.getY());
+        g2d.rotate(angle);
+
+        int textWidth = g2d.getFontMetrics().stringWidth(text);
+        int textHeight = g2d.getFontMetrics().getHeight();
+
+        g2d.drawString(text, -textWidth / 2, textHeight / 3); // leicht nach oben verschoben
+        g2d.setTransform(old);
+    }
+
 
     private void DrawLabels(List<Rectangle> usedIconAreas, List<Rectangle> usedLabelAreas, FontMetrics fm) {
         // Handle label-only entries
@@ -392,6 +462,9 @@ public class MapRenderer {
 
         int[] streetSubBoundaries = LSIClassCentreDB.lsiClassRange("INNERORTSTRASSE_ALL");
         List<DomainFeature> innerCityStreets = extractLSISubSet(streetGeoms, streetSubBoundaries[0], streetSubBoundaries[1]);
+        for (DomainFeature feature : innerCityStreets)
+            if (!feature.realname().contains("_"))  // Names like ZUFAHRT_4564485 get skipped
+                streetFeatureList.add(feature);
 
         drawStreetsFromDomainFeatures(innerCityStreets, fillColor, borderColor, 0.00004, 0.000026 );
 
