@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.io.WKBReader;
@@ -44,39 +45,65 @@ public class DataFetcher {
                                                   double lat, double lon,
                                                   int wPx, int hPx,
                                                   double widthMeters) throws Exception {
-        // Halbe Ausdehnung in Metern
-        double halfW = widthMeters / 2.0;
-        // Höhe in Metern
-        double heightMeters = widthMeters * hPx / wPx;
-        double halfH = heightMeters / 2.0;
+//        // Halbe Ausdehnung in Metern
+//        double halfW = widthMeters / 2.0;
+//        // Höhe in Metern
+//        double heightMeters = widthMeters * hPx / wPx;
+//        double halfH = heightMeters / 2.0;
+//
+//        String sql =
+//                "SELECT ST_AsEWKB( " +
+//                        "  ST_Transform( " +
+//                        "    ST_Expand( " +
+//                        "      ST_Transform( " +
+//                        "        ST_SetSRID(ST_Point(? , ?), 4326), " +
+//                        "      3857), " +
+//                        "      ?, ? " +      // halfWidth, halfHeight in Meter
+//                        "    ), " +
+//                        "  4326)" +
+//                        ")";
+//        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+//            // 1 = lon, 2 = lat
+//            ps.setDouble(1, lon);
+//            ps.setDouble(2, lat);
+//            // 3 = halfWidth, 4 = halfHeight
+//            ps.setDouble(3, halfW);
+//            ps.setDouble(4, halfH);
+//
+//            try (ResultSet rs = ps.executeQuery()) {
+//                if (!rs.next()) {
+//                    throw new IllegalStateException("Keine Geometrie zurückgegeben");
+//                }
+//                byte[] wkb = rs.getBytes(1);
+//                return new WKBReader(geomFact).read(wkb);
+//            }
+//        }
 
-        String sql =
-                "SELECT ST_AsEWKB( " +
-                        "  ST_Transform( " +
-                        "    ST_Expand( " +
-                        "      ST_Transform( " +
-                        "        ST_SetSRID(ST_Point(? , ?), 4326), " +
-                        "      3857), " +
-                        "      ?, ? " +      // halfWidth, halfHeight in Meter
-                        "    ), " +
-                        "  4326)" +
-                        ")";
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            // 1 = lon, 2 = lat
-            ps.setDouble(1, lon);
-            ps.setDouble(2, lat);
-            // 3 = halfWidth, 4 = halfHeight
-            ps.setDouble(3, halfW);
-            ps.setDouble(4, halfH);
+        // Approximate scale factors für Nürnberg:
+        // 1 Grad Länge ~ 72.300 m
+        // 1 Grad Breite ~ 111.320 m
+        final double metersPerDegLon = 72300;
+        final double metersPerDegLat = 111320;
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) {
-                    throw new IllegalStateException("Keine Geometrie zurückgegeben");
-                }
-                byte[] wkb = rs.getBytes(1);
-                return new WKBReader(geomFact).read(wkb);
-            }
-        }
+        // Halbe Breite und Höhe in Grad berechnen
+        double halfWidthDeg = (widthMeters / 2.0) / metersPerDegLon;
+        double heightMeters = widthMeters * ((double) hPx / wPx);
+        double halfHeightDeg = (heightMeters / 2.0) / metersPerDegLat;
+
+        double minLon = lon - halfWidthDeg;
+        double maxLon = lon + halfWidthDeg;
+        double minLat = lat - halfHeightDeg;
+        double maxLat = lat + halfHeightDeg;
+
+        Coordinate[] coords = new Coordinate[] {
+                new Coordinate(minLon, minLat),
+                new Coordinate(minLon, maxLat),
+                new Coordinate(maxLon, maxLat),
+                new Coordinate(maxLon, minLat),
+                new Coordinate(minLon, minLat)
+        };
+
+        return geomFact.createPolygon(coords);
     }
 
     /** Liefert das Polygon, das du in deinen WHERE‑Klauseln benutzen kannst. */
