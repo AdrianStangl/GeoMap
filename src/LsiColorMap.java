@@ -270,6 +270,13 @@ public class LsiColorMap {
         colorMap.put("PARK",                 new ColorPair(new Color(81, 170, 81, 200),   new Color(55, 125, 55, 220)));
         colorMap.put("GENERAL_PUBLIC_PLACE", new ColorPair(new Color(81, 188, 81, 255),   new Color(61, 148, 61, 255)));
         colorMap.put("PUBLIC_PLACE",         new ColorPair(new Color(76, 160, 90, 200),   new Color(56, 120, 66, 220)));
+
+        // Streets
+        colorMap.put("AUTOBAHN",             new ColorPair(new Color(100, 140, 210, 255), new Color( 50,  90, 160, 240)));
+        colorMap.put("KRAFTFAHRSTRASSE",     new ColorPair(new Color(100, 160, 190, 255), new Color( 40, 110, 150, 230)));
+        colorMap.put("LANDSTRASSE",          new ColorPair(new Color(200, 170, 110, 255), new Color(140, 110,  60, 230)));
+        colorMap.put("INNERORTSTRASSE_ALL",  new ColorPair(new Color(120, 120, 120, 255), new Color( 50,  50,  50, 240)));
+
     }
 
     public static ColorPair getColor(String key) {

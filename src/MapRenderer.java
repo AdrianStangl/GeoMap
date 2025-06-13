@@ -272,10 +272,6 @@ public class MapRenderer {
                     }
                 }
 
-                if (!placed) {
-                    System.out.println("Skipped icon+label: " + label);
-                }
-
             } catch (IOException e) {
                 System.err.println("Could not load icon: " + info.iconPath());
             }
@@ -504,16 +500,24 @@ public class MapRenderer {
     }
 
     public void drawStreets(List<DomainFeature> streetGeoms) {
-        Color fillColor = new Color(97, 91, 91, 255);  // Cornflower Blue, semi-transparent
-        Color borderColor = new Color(43, 40, 40, 236);  // Darker blue
+        // List for all the streets that should get labels
+        List<DomainFeature> labelstreetGeomList = new ArrayList<>();
+        // default road colors is the innerort color
+        LsiColorMap.ColorPair pair = LsiColorMap.getColor("INNERORTSTRASSE_ALL");
+        Color fillColor = pair.fill();
+        Color borderColor = pair.stroke();
 
-        int[] streetSubBoundaries = LSIClassCentreDB.lsiClassRange("INNERORTSTRASSE_ALL");
-        List<DomainFeature> innerCityStreets = extractLSISubSet(streetGeoms, streetSubBoundaries[0], streetSubBoundaries[1]);
-        for (DomainFeature feature : innerCityStreets)
+        // Extracting the streets in the order of this list also indirectly creates a priority for the labels
+        for (String lsiClassName : LSIClassGroups.STREETS) {
+            List<DomainFeature> tempStreetList = extractLSISubSet(streetGeoms, lsiClassName);
+
+            labelstreetGeomList.addAll(tempStreetList);
+            drawFeatureSubSet(tempStreetList, lsiClassName, fillColor, borderColor, 0.000026);
+        }
+
+        for (DomainFeature feature : labelstreetGeomList)
             if (!feature.realname().contains("_"))  // Names like ZUFAHRT_4564485 get skipped
                 streetFeatureList.add(feature);
-
-        drawStreetsFromDomainFeatures(innerCityStreets, fillColor, borderColor, 0.00004, 0.000026 );
 
         // draw remaning street geos
         drawStreetsFromDomainFeatures(streetGeoms, fillColor, borderColor, 0.000045, 0.00003);
@@ -568,6 +572,7 @@ public class MapRenderer {
             int labelX = toPixelX(center.x);
             int labelY = toPixelY(center.y);
             labelOnlyList.add(new IconDrawInfo(null, labelX, labelY, 0, 0, feature.realname()));
+            if (feature.realname().contains("vögel")) System.out.println("wasservogel lsi klasse. " + feature.lsiclass1() + " " + feature.lsiclass2() + " " + feature.lsiclass3());
         }
     }
 

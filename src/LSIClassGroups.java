@@ -135,4 +135,9 @@ public class LSIClassGroups {
         // Rest of the vegetation
         "VEGETATION"
     };
+
+    public static final String[] STREETS = {
+        "AUTOBAHN", "KRAFTFAHRSTRASSE", "LANDSTRASSE",
+        "INNERORTSTRASSE_ALL",
+    };
 }
