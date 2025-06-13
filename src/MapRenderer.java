@@ -1,4 +1,6 @@
 import java.awt.*;
+import java.awt.font.FontRenderContext;
+import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
@@ -77,8 +79,8 @@ public class MapRenderer {
             drawDomainFeature(drawFeature.feature(), drawFeature.fillColor(), drawFeature.borderColor(), drawFeature.buffer());
         }
 
-        List<Rectangle> usedLabelAreas = new ArrayList<>();
-        List<Rectangle> usedIconAreas = new ArrayList<>();
+        List<Shape> usedLabelAreas = new ArrayList<>();
+        List<Shape> usedIconAreas = new ArrayList<>();
 
         Font font = new Font("SansSerif", Font.BOLD, globalFontsize);
         g.setFont(font);
@@ -86,40 +88,60 @@ public class MapRenderer {
 
         DrawIconsAndLabels(fm, usedIconAreas, usedLabelAreas);
         DrawLabels(usedIconAreas, usedLabelAreas, fm);
-        DrawStreetLabels(g, fm);
+        DrawStreetLabels(g, fm, usedIconAreas ,usedLabelAreas);
     }
 
-    private void DrawStreetLabels(Graphics2D g2d, FontMetrics fm) {
-        double labelRadius = 200.0;
+    private void DrawStreetLabels(Graphics2D g2d, FontMetrics fm, List<Shape> usedIconAreas, List<Shape> usedLabelAreas) {
+        System.out.println("Drawing Street Labels, this may take a while...");
+        double labelMinDistance = 200.0;
         Map<String, List<Point2D>> labelPositions = new HashMap<>();
 
         for (DomainFeature road : streetFeatureList) {
             Geometry geom = road.geometry();
-
-            // Sicherstellen, dass es ein LineString ist
             if (!(geom instanceof com.vividsolutions.jts.geom.LineString line)) continue;
 
             Coordinate[] coords = line.getCoordinates();
             if (coords.length < 2) continue;
 
-            // Mittelpunkt und Winkel bestimmen
-            Point2D labelPos = computeMidpoint(coords);
+            Point2D baseLabelPos = computeMidpoint(coords);
             double angle = computeLocalAngle(coords);
 
-            // Prüfen, ob in der Nähe schon ein Label mit gleichem Namen ist
-            boolean tooClose = false;
-            for (Point2D existing : labelPositions.getOrDefault(road.realname(), List.of())) {
-                if (labelPos.distance(existing) < labelRadius) {
-                    tooClose = true;
+            // Prüfen, ob zu nah an bestehenden Labels mit gleichem Namen
+            boolean tooClose = labelPositions
+                    .getOrDefault(road.realname(), List.of())
+                    .stream().anyMatch(p -> p.distance(baseLabelPos) < labelMinDistance);
+            if (tooClose) continue;
+
+            // Text-Maße berechnen
+            String label = road.realname();
+            int textWidth = fm.stringWidth(label);
+            int textHeight = fm.getHeight();
+            int ascent = fm.getAscent();
+
+            int[][] offsets = {
+                    {0, 0}, {6, 0}, {-6, 0}, {0, 6}, {0, -6},
+                    {6, 6}, {-6, -6}, {8, 0}, {0, 8}
+            };
+
+            boolean placed = false;
+            for (int[] offset : offsets) {
+                double offsetX = baseLabelPos.getX() + offset[0];
+                double offsetY = baseLabelPos.getY() + offset[1];
+                Point2D offsetPos = new Point2D.Double(offsetX, offsetY);
+
+
+                Shape labelShape = createRotatedLabelShape(label, offsetPos, angle, g2d);
+
+                boolean overlapsLabel = usedLabelAreas.stream().anyMatch(s -> s.intersects(labelShape.getBounds2D()));
+                boolean overlapsIcon = usedIconAreas.stream().anyMatch(s -> s.intersects(labelShape.getBounds2D()));
+
+                if (!overlapsLabel && !overlapsIcon) {
+                    drawRotatedLabel(g2d, label, offsetPos, angle);
+                    usedLabelAreas.add(labelShape);
+                    labelPositions.computeIfAbsent(label, k -> new ArrayList<>()).add(offsetPos);
+                    placed = true;
                     break;
                 }
-            }
-
-            // Wenn weit genug entfernt, Label zeichnen
-            if (!tooClose) {
-                System.out.println("Road: " + road.realname() + " has been drawn!");
-                drawRotatedLabel(g2d, road.realname(), labelPos, angle);
-                labelPositions.computeIfAbsent(road.realname(), k -> new ArrayList<>()).add(labelPos);
             }
         }
     }
@@ -142,7 +164,15 @@ public class MapRenderer {
         double dx = x2 - x1;
         double dy = y2 - y1;
 
-        return Math.atan2(dy, dx);
+        // Check if label would be upsidedown and flip
+        double angle = Math.atan2(dy, dx);
+
+        // Nur bei mehr als 90° Neigung kippen (d.h. Text ist "unten")
+        if (angle > Math.PI / 2 || angle < -Math.PI / 2) {
+            angle += Math.PI; // Rotate
+        }
+
+        return angle;
     }
 
     private void drawRotatedLabel(Graphics2D g2d, String text, Point2D position, double angle) {
@@ -154,12 +184,29 @@ public class MapRenderer {
         int textWidth = g2d.getFontMetrics().stringWidth(text);
         int textHeight = g2d.getFontMetrics().getHeight();
 
-        g2d.drawString(text, -textWidth / 2, textHeight / 3); // leicht nach oben verschoben
+        g2d.setColor(Color.BLACK);
+        g2d.drawString(text, -textWidth / 2 + 1, textHeight / 3 + 1); // shadow
+        g2d.setColor(Color.WHITE);
+        g2d.drawString(text, -textWidth / 2, textHeight / 3);         // foreground
+
         g2d.setTransform(old);
     }
 
+    private Shape createRotatedLabelShape(String text, Point2D pos, double angle, Graphics2D g2d) {
+        FontRenderContext frc = g2d.getFontRenderContext();
+        TextLayout layout = new TextLayout(text, g2d.getFont(), frc);
+        Shape textShape = layout.getOutline(null);
 
-    private void DrawLabels(List<Rectangle> usedIconAreas, List<Rectangle> usedLabelAreas, FontMetrics fm) {
+        AffineTransform transform = new AffineTransform();
+        transform.translate(pos.getX(), pos.getY());
+        transform.rotate(angle);
+        transform.translate(-layout.getBounds().getWidth() / 2, layout.getBounds().getHeight() / 3);
+
+        return transform.createTransformedShape(textShape);
+    }
+
+
+    private void DrawLabels(List<Shape> usedIconAreas, List<Shape> usedLabelAreas, FontMetrics fm) {
         // Handle label-only entries
         for (IconDrawInfo labelOnly : labelOnlyList) {
             String label = cleanRealName(labelOnly.label());
@@ -167,7 +214,7 @@ public class MapRenderer {
         }
     }
 
-    private void DrawIconsAndLabels(FontMetrics fm, List<Rectangle> usedIconAreas, List<Rectangle> usedLabelAreas) {
+    private void DrawIconsAndLabels(FontMetrics fm, List<Shape> usedIconAreas, List<Shape> usedLabelAreas) {
         for (IconDrawInfo info : iconDrawList) {
             String label = cleanRealName(info.label());
             int iconW = info.width();
@@ -236,7 +283,7 @@ public class MapRenderer {
     }
 
     private void placeAndDrawLabel(Graphics2D g, String label, int centerX, int baselineY,
-                                   List<Rectangle> usedIconAreas, List<Rectangle> usedLabelAreas, FontMetrics fm) {
+                                   List<Shape> usedIconAreas, List<Shape> usedLabelAreas, FontMetrics fm) {
         int textWidth = fm.stringWidth(label);
         int textHeight = fm.getHeight();
 
