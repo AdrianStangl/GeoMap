@@ -27,6 +27,26 @@ public class LsiIconLabelMap {
             return new IconDisplayInfo("school", true);
         } else if (lsiClass == 92100000 ) {  // schools
             return new IconDisplayInfo("construction", false);
+        } else if (lsiClass >= 20700000 && lsiClass <= 20757000) {  // medical stuff
+            return new IconDisplayInfo("hospital2", true);
+        } else if (lsiClass == 31418000 || lsiClass == 31426000 || lsiClass == 31426100) {  // minigolf or other golf
+            return new IconDisplayInfo("golf", true);
+        } else if (lsiClass >= 20830000 && lsiClass <= 20836000) {  // church stuff
+            return new IconDisplayInfo("church", true);
+        } else if (lsiClass == 20516110) {
+            return new IconDisplayInfo("hotel", true);
+        } else if (lsiClass == 20220000) {
+            return new IconDisplayInfo("library", true);
+        } else if (lsiClass == 20230000) {
+            return new IconDisplayInfo("research", true); // Research
+        } else if (lsiClass >= 20240000 && lsiClass <= 20242000) {
+            return new IconDisplayInfo("planet", true); // Astronomie
+        } else if (lsiClass == 31404000) {
+            return new IconDisplayInfo("tennis", false); // Tennis
+        } else if (lsiClass == 20514200 || lsiClass == 20514300 || lsiClass == 20514100) {
+            return new IconDisplayInfo("nightlife", true); // Fun stuff
+        } else if (lsiClass >= 20920000 && lsiClass <= 20922000) {
+            return new IconDisplayInfo("museum", true); // Museum stuff
         }
         return null;
     }
