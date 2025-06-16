@@ -41,7 +41,7 @@ public class Mapout {
         try {
             drawMapForParameters(connection, centerLat, centerLon, pxWidth, pxHeight, meterWidth, outputFile);
             drawMapForParameters(connection, 49.445555, 11.082587, 1024, 512, 1234.5, "examplePrompt.png");
-            drawMapForParameters(connection, 49.44750, 11.14575, 2048, 1024, 2300, "zoo.png");
+            drawMapForParameters(connection, 49.44750, 11.14575, 2000, 1000, 1800, "zoo.png");
             drawMapForParameters(connection, 49.45120, 11.09857, 1024, 512, 500, "see.png");
         }
         catch (Exception e) {
@@ -59,7 +59,7 @@ public class Mapout {
         // Karte rendern
         MapRenderer renderer = new MapRenderer(connection,
                 fetcher.getTargetSquare(),
-                pxWidth, pxHeight);
+                pxWidth, pxHeight, meterWidth);
         renderer.drawMap(connection, fetcher);
         renderer.saveImage(outputFile);
 

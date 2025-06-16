@@ -30,8 +30,8 @@ public class MapRenderer {
     private final double scaleX;
     private final double scaleY;
 
-    private final int iconSize = 18; // Square icon size in pixels
-    private final int globalFontsize = 12;
+    private final int iconSize; // Square icon size in pixels
+    private final int globalFontsize;
 
     private List<DrawableFeature> drawableFeatures;
     private List<IconDrawInfo> iconDrawList = new ArrayList<>();
@@ -39,7 +39,7 @@ public class MapRenderer {
     private List<DomainFeature> streetFeatureList = new ArrayList<>();
 
     public MapRenderer(Connection conn, Geometry targetSquare,
-                       int pxWidth, int pxHeight) throws Exception {
+                       int pxWidth, int pxHeight, double meterWidth) throws Exception {
         this.target = targetSquare;
         this.env = targetSquare.getEnvelopeInternal();
         this.width = pxWidth;
@@ -54,6 +54,8 @@ public class MapRenderer {
                 java.awt.RenderingHints.VALUE_ANTIALIAS_ON
         );
 
+        globalFontsize = computeFontSizeForScale((int) meterWidth);
+        iconSize = computeIconSize((int) meterWidth);
         drawableFeatures = new ArrayList<>();
     }
 
@@ -89,6 +91,21 @@ public class MapRenderer {
         DrawIconsAndLabels(fm, usedIconAreas, usedLabelAreas);
         DrawLabels(usedIconAreas, usedLabelAreas, fm);
         DrawStreetLabels(g, fm, usedIconAreas ,usedLabelAreas);
+    }
+
+    private int computeFontSizeForScale(int meters) {
+        // Logarithmic scaling
+        double scaleFactor = Math.log10(meters);
+
+        int fontSize = (int) (scaleFactor * 6); // Multiplier found experimentally
+        return Math.max(8, Math.min(fontSize, 30));
+    }
+
+    private int computeIconSize(int scaleMeters) {
+        double scaleFactor = Math.log10(scaleMeters);
+
+        int size = (int) (scaleFactor * 10);
+        return Math.max(12, Math.min(size, 32));
     }
 
     private void DrawStreetLabels(Graphics2D g2d, FontMetrics fm, List<Shape> usedIconAreas, List<Shape> usedLabelAreas) {
@@ -241,7 +258,7 @@ public class MapRenderer {
                     int textAscent = fm.getAscent();
                     int textHeight = fm.getHeight(); // used for the full bounding box if needed
 
-                    int labelPadding = 12;
+                    int labelPadding = iconSize / 2;  // use icon size divided by factor as padding (found experimentally)
                     int labelX = x + iconW / 2;
                     int labelY = y + iconH + labelPadding;
 
