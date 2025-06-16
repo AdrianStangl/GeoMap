@@ -303,10 +303,10 @@ public class MapRenderer {
         int[][] offsets = {
                 {0, 0},                             // below
                 {0, -textHeight - 4},              // above
-                {-textWidth - 5, 0},               // left
-                {textWidth + 5, 0},                // right
-                {-textWidth / 2, textHeight + 4},  // bottom-left
-                {textWidth / 2, textHeight + 4},   // bottom-right
+                {-textWidth / 2 - 5, 0},               // left
+                {textWidth/ 2 + 5, 0},                // right
+                {-textWidth / 2, textHeight / 2 + 4},  // bottom-left
+                {textWidth / 2, textHeight / 2 + 4},   // bottom-right
         };
 
         for (int[] offset : offsets) {
