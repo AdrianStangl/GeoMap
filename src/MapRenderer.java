@@ -28,13 +28,14 @@ public class MapRenderer {
     private final int iconSize; // Square icon size in pixels
     private final int globalFontsize;
 
-    private LabelRenderer labelRenderer;
-    private List<DrawableFeature> drawableFeatures;
-    private List<IconDrawInfo> iconDrawList = new ArrayList<>();
-    private List<IconDrawInfo> labelOnlyList = new ArrayList<>();
-    private List<DomainFeature> streetFeatureList = new ArrayList<>();
+    private final LabelRenderer labelRenderer;
 
-    public MapRenderer(Connection conn, Geometry targetSquare,
+    private final List<DrawableFeature> drawableFeatures;
+    private final List<IconDrawInfo> iconDrawList = new ArrayList<>();
+    private final List<IconDrawInfo> labelOnlyList = new ArrayList<>();
+    private final List<DomainFeature> streetFeatureList = new ArrayList<>();
+
+    public MapRenderer(Geometry targetSquare,
                        int pxWidth, int pxHeight, double meterWidth) throws Exception {
         this.target = targetSquare;
         this.env = targetSquare.getEnvelopeInternal();
@@ -224,11 +225,9 @@ public class MapRenderer {
             drawFeatureSubSet(openareaGeoms, lsiClassName, fillColor, borderColor, 0.00002);
         }
 
-        // Extract and draw streets
-        int[] trashLSIBoundaries = LSIClassCentreDB.lsiClassRange("TRAFFIC_MORE");
-        List<DomainFeature> trash = extractLSISubSet(openareaGeoms, trashLSIBoundaries[0], trashLSIBoundaries[1]);
-        trashLSIBoundaries = LSIClassCentreDB.lsiClassRange("BAHNSTEIG");
-        trash = extractLSISubSet(openareaGeoms, trashLSIBoundaries[0], trashLSIBoundaries[1]);
+        // Extract unwanted streets
+        List<DomainFeature> trash = extractLSISubSet(openareaGeoms, "TRAFFIC_MORE");
+        trash = extractLSISubSet(openareaGeoms, "BAHNSTEIG");
 
         // draw the remaining open areas
         for (DomainFeature feature : openareaGeoms) {
@@ -281,7 +280,6 @@ public class MapRenderer {
 
         // Draw remaning geoms not in the list
         for (DomainFeature feature : otherGeoms) {
-            System.out.println("not clarified for: " + feature.realname()+ " " + feature.lsiclass1() + " " + feature.lsiclass2()+" " + feature.lsiclass3());
             if(!feature.realname().contains("Landschaftsschutzgebiet Wöhrder See"))
                 addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0);
         }
@@ -307,8 +305,8 @@ public class MapRenderer {
             if (!feature.realname().contains("_"))  // Names like ZUFAHRT_4564485 get skipped
                 streetFeatureList.add(feature);
 
-        // draw remaning street geos
-        drawStreetsFromDomainFeatures(streetGeoms, fillColor, borderColor, 0.000045, 0.00003);
+        for (DomainFeature feature : streetGeoms)
+            addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0.00003);
     }
 
     private void drawDomainFeature(DomainFeature feature, Color fillColor, Color borderColor, double buffer){
@@ -369,14 +367,6 @@ public class MapRenderer {
         drawableFeatures.add(new DrawableFeature(feature,fillColor,borderColor, buffer));
     }
 
-    // TODO Check if still need this method or merge with other subset draw
-    /// Draws a thick line of border color and a thinner liner of fillColor
-    private void drawStreetsFromDomainFeatures(List<DomainFeature> features, Color fillColor, Color borderColor, double outerBuffer, double innerBuffer) {
-        for (DomainFeature feature : features) {
-            addDomainFeatureToGlobalList(feature, fillColor, borderColor, innerBuffer);
-        }
-    }
-
     private List<DomainFeature> extractLSISubSet(List<DomainFeature> features, String lsiClassName){
         int[] classRange = LSIClassCentreDB.lsiClassRange(lsiClassName);
         return extractLSISubSet(features, classRange[0], classRange[1]);
@@ -384,7 +374,7 @@ public class MapRenderer {
 
     /// Returns subset of features list where the features are between lowerBound and upperBound, including the borders
     private List<DomainFeature> extractLSISubSet(List<DomainFeature> features, int lowerBound, int upperBound) {
-        List<DomainFeature> subset = new ArrayList<DomainFeature>();
+        List<DomainFeature> subset = new ArrayList<>();
         for (int i = 0; i < features.size(); i++) {
             DomainFeature feature = features.get(i);
             if (feature.lsiclass3() >= lowerBound && feature.lsiclass3() <= upperBound){

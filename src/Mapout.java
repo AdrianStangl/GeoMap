@@ -1,10 +1,7 @@
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.io.WKBWriter;
 import fu.keys.LSIClassCentreDB;
 import fu.util.DBUtil;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 
 public class Mapout {
     public static void main(String[] args) {
@@ -52,12 +49,11 @@ public class Mapout {
     }
 
     private static void drawMapForParameters(Connection connection, double centerLat, double centerLon, int pxWidth, int pxHeight, double meterWidth, String outputFile) throws Exception {
-        DataFetcher fetcher = new DataFetcher(connection,
-                centerLat, centerLon,
+        DataFetcher fetcher = new DataFetcher(centerLat, centerLon,
                 pxWidth, pxHeight,
                 meterWidth);
         // Karte rendern
-        MapRenderer renderer = new MapRenderer(connection,
+        MapRenderer renderer = new MapRenderer(
                 fetcher.getTargetSquare(),
                 pxWidth, pxHeight, meterWidth);
         renderer.drawMap(connection, fetcher);

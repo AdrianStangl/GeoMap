@@ -18,21 +18,18 @@ import fu.keys.LSIClassCentreDB;
 public class DataFetcher {
     private static final GeometryFactory geomFact = new GeometryFactory();
     private final Geometry targetSquare;
-
+// TODO
     /**
-     * @param conn       offener JDBC-Connection zu deinem PostGIS
      * @param centerLat  Mittelpunkt-Breitengrad (z.B. 49.445555)
      * @param centerLon  Mittelpunkt-Längengrad (z.B. 11.082587)
      * @param pxWidth    Bildbreite in Pixeln (z.B. 1024)
      * @param pxHeight   Bildhöhe in Pixeln (z.B. 512)
      * @param meterWidth Breite in Metern, die das Bild horizontal abdecken soll (z.B. 1234.5)
      */
-    public DataFetcher(Connection conn,
-                       double centerLat, double centerLon,
+    public DataFetcher(double centerLat, double centerLon,
                        int pxWidth, int pxHeight,
-                       double meterWidth) throws Exception {
-        this.targetSquare = calculateTargetSquare(conn,
-                centerLat, centerLon,
+                       double meterWidth) {
+        this.targetSquare = calculateTargetSquare(centerLat, centerLon,
                 pxWidth, pxHeight,
                 meterWidth);
     }
@@ -41,10 +38,9 @@ public class DataFetcher {
      * Führt die PostGIS-Abfrage durch, um ein WGS84-Polygon des Rechtecks
      * über Web‑Mercator zu bekommen.
      */
-    private static Geometry calculateTargetSquare(Connection conn,
-                                                  double lat, double lon,
+    private static Geometry calculateTargetSquare(double lat, double lon,
                                                   int wPx, int hPx,
-                                                  double widthMeters) throws Exception {
+                                                  double widthMeters) {
 //        // Halbe Ausdehnung in Metern
 //        double halfW = widthMeters / 2.0;
 //        // Höhe in Metern
