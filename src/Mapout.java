@@ -8,10 +8,10 @@ public class Mapout {
         Connection connection = null;
 
         try {
-            /* Zugang zur Datenbank einrichten */
+            /* Setup DB access */
             DBUtil.parseDBparams("127.0.0.1/5432/dbuser/dbuser/deproDBMittelfrankenPG", 0);
             connection = DBUtil.getConnection(0);
-            connection.setAutoCommit(false);  //Getting results based on a cursor
+            connection.setAutoCommit(false);
             LSIClassCentreDB.initFromDB(connection);
         } catch (Exception e) {
             System.out.println("Error initialising DB access: " + e.toString());
@@ -51,10 +51,8 @@ public class Mapout {
         DataFetcher fetcher = new DataFetcher(centerLat, centerLon,
                 pxWidth, pxHeight,
                 meterWidth);
-        // Karte rendern
-        MapRenderer renderer = new MapRenderer(
-                fetcher.getTargetSquare(),
-                pxWidth, pxHeight, meterWidth);
+        // Render map
+        MapRenderer renderer = new MapRenderer(fetcher.getTargetSquare(), pxWidth, pxHeight, meterWidth);
         renderer.drawMap(connection, fetcher);
         renderer.saveImage(outputFile);
 
