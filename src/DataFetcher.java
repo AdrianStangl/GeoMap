@@ -11,21 +11,11 @@ import com.vividsolutions.jts.io.WKBReader;
 import com.vividsolutions.jts.io.WKBWriter;
 import fu.keys.LSIClassCentreDB;
 
-/**
- * Liest aus PostGIS das Polygon des gewünschten Karten-Ausschnitts
- * in WGS84 (Lon/Lat) aus und hält es als JTS-Geometry vor.
- */
+
 public class DataFetcher {
     private static final GeometryFactory geomFact = new GeometryFactory();
     private final Geometry targetSquare;
-// TODO
-    /**
-     * @param centerLat  Mittelpunkt-Breitengrad (z.B. 49.445555)
-     * @param centerLon  Mittelpunkt-Längengrad (z.B. 11.082587)
-     * @param pxWidth    Bildbreite in Pixeln (z.B. 1024)
-     * @param pxHeight   Bildhöhe in Pixeln (z.B. 512)
-     * @param meterWidth Breite in Metern, die das Bild horizontal abdecken soll (z.B. 1234.5)
-     */
+
     public DataFetcher(double centerLat, double centerLon,
                        int pxWidth, int pxHeight,
                        double meterWidth) {
@@ -34,46 +24,9 @@ public class DataFetcher {
                 meterWidth);
     }
 
-    /**
-     * Führt die PostGIS-Abfrage durch, um ein WGS84-Polygon des Rechtecks
-     * über Web‑Mercator zu bekommen.
-     */
     private static Geometry calculateTargetSquare(double lat, double lon,
                                                   int wPx, int hPx,
                                                   double widthMeters) {
-//        // Halbe Ausdehnung in Metern
-//        double halfW = widthMeters / 2.0;
-//        // Höhe in Metern
-//        double heightMeters = widthMeters * hPx / wPx;
-//        double halfH = heightMeters / 2.0;
-//
-//        String sql =
-//                "SELECT ST_AsEWKB( " +
-//                        "  ST_Transform( " +
-//                        "    ST_Expand( " +
-//                        "      ST_Transform( " +
-//                        "        ST_SetSRID(ST_Point(? , ?), 4326), " +
-//                        "      3857), " +
-//                        "      ?, ? " +      // halfWidth, halfHeight in Meter
-//                        "    ), " +
-//                        "  4326)" +
-//                        ")";
-//        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-//            // 1 = lon, 2 = lat
-//            ps.setDouble(1, lon);
-//            ps.setDouble(2, lat);
-//            // 3 = halfWidth, 4 = halfHeight
-//            ps.setDouble(3, halfW);
-//            ps.setDouble(4, halfH);
-//
-//            try (ResultSet rs = ps.executeQuery()) {
-//                if (!rs.next()) {
-//                    throw new IllegalStateException("Keine Geometrie zurückgegeben");
-//                }
-//                byte[] wkb = rs.getBytes(1);
-//                return new WKBReader(geomFact).read(wkb);
-//            }
-//        }
 
         // Approximate scale factors für Nürnberg:
         // 1 Grad Länge ~ 72.300 m
@@ -102,7 +55,6 @@ public class DataFetcher {
         return geomFact.createPolygon(coords);
     }
 
-    /** Liefert das Polygon, das du in deinen WHERE‑Klauseln benutzen kannst. */
     public Geometry getTargetSquare() {
         return targetSquare;
     }
@@ -133,7 +85,7 @@ public class DataFetcher {
         System.out.println("Fetching from " + lsiLower + " to " + lsiUpper);
 
         StringBuilder sql = new StringBuilder("""
-            SELECT realname, lsiclass1, lsiclass2, lsiclass3, ST_AsEWKB(geom :: geometry), geometry, ST_Area(geom :: geometry), tags
+            SELECT realname, lsiclass1, lsiclass2, lsiclass3, ST_AsEWKB(geom :: geometry) AS geom, geometry, ST_Area(geom :: geometry) AS area, tags
             FROM domain
             WHERE ST_Intersects(geom :: geometry, ST_GeomFromWKB(?, 4326))
               AND (lsiclass1 BETWEEN ? AND ? or lsiclass2 BETWEEN ? AND ? or lsiclass3 BETWEEN ? AND ?)
@@ -145,7 +97,6 @@ public class DataFetcher {
         }
 
         if (excludeHistoric){
-            System.out.println("i dont like old things");
             sql.append(" AND lsiclass2 not BETWEEN ? AND ?");
         }
 
@@ -174,9 +125,9 @@ public class DataFetcher {
                     int lsiclass1 = rs.getInt("lsiclass1");
                     int lsiclass2 = rs.getInt("lsiclass2");
                     int lsiclass3 = rs.getInt("lsiclass3");
-                    Geometry geom = reader.read(rs.getBytes(5));
+                    Geometry geom = reader.read(rs.getBytes("geom"));
                     String geometryDataType = rs.getString("geometry");
-                    double area = rs.getDouble(7);
+                    double area = rs.getDouble("area");
                     String tags = rs.getString("tags");
                     features.add(new DomainFeature(realname, lsiclass1, lsiclass2, lsiclass3, geom, geometryDataType, area, tags));
                 }
@@ -186,6 +137,7 @@ public class DataFetcher {
         return features;
     }
 
+    // Helper method to get all distinct LSI classes within a geometry
     public void printDistinctLSIClassesWithDescription(Connection conn) throws Exception {
         String sql =
                 "SELECT DISTINCT ON (d.lsiclass1) " +

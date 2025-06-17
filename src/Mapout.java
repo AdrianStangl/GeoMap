@@ -5,7 +5,6 @@ import java.sql.Connection;
 
 public class Mapout {
     public static void main(String[] args) {
-        // ... DBUtil.parseDBparams(args[0],0); etc.
         Connection connection = null;
 
         try {
@@ -58,8 +57,6 @@ public class Mapout {
                 pxWidth, pxHeight, meterWidth);
         renderer.drawMap(connection, fetcher);
         renderer.saveImage(outputFile);
-
-        // fetcher.printDistinctLSIClassesWithDescription(connection);
 
         System.out.println("Karte geschrieben nach " + outputFile);
     }
