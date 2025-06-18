@@ -157,11 +157,21 @@ public class LabelRenderer {
     }
 
 
-    public void drawLabels(List<IconDrawInfo> labelOnlyList,List<Shape> usedIconAreas, List<Shape> usedLabelAreas, FontMetrics fm) {
+    public void drawNormalLabels(List<IconDrawInfo> labelOnlyList, List<Shape> usedIconAreas, List<Shape> usedLabelAreas, FontMetrics fm) {
         // Handle label-only entries
         for (IconDrawInfo labelOnly : labelOnlyList) {
             String label = cleanRealName(labelOnly.label());
-            placeAndDrawLabel(g, label, labelOnly.x(), labelOnly.y(), usedIconAreas, usedLabelAreas, fm);
+            placeAndDrawLabel(g, label, labelOnly.x(), labelOnly.y(), usedIconAreas, usedLabelAreas, fm, Color.BLACK, Color.WHITE);
+        }
+    }
+
+    public void drawWaterLabels(List<IconDrawInfo> waterLabelList, List<Shape> usedIconAreas, List<Shape> usedLabelAreas, FontMetrics fm) {
+        Color labelShadow = new Color(90, 140, 200);    // neutral-dunkel
+        Color labelFill = new Color(200, 240, 255);    // helles Eisblau
+        System.out.println("there are " + usedLabelAreas.size() + " water label");
+        for (IconDrawInfo labelOnly : waterLabelList) {
+            String label = cleanRealName(labelOnly.label());
+            placeAndDrawLabel(g, label, labelOnly.x(), labelOnly.y(), usedIconAreas, usedLabelAreas, fm, labelShadow, labelFill);
         }
     }
 
@@ -215,7 +225,7 @@ public class LabelRenderer {
 
                     if (!overlapsIcon && !overlapsLabel && !iconOverLabel && !labelOverIcon) {
                         g.drawImage(img, x, y, iconW, iconH, null);
-                        drawLabel(g, label, labelX, labelY, fm); // pass in fm for consistency
+                        drawLabel(g, label, labelX, labelY, fm, Color.BLACK, Color.WHITE); // pass in fm for consistency
                         usedIconAreas.add(iconBox);
                         usedLabelAreas.add(labelBox);
                         placed = true;
@@ -230,7 +240,7 @@ public class LabelRenderer {
     }
 
     public void placeAndDrawLabel(Graphics2D g, String label, int centerX, int baselineY,
-                                   List<Shape> usedIconAreas, List<Shape> usedLabelAreas, FontMetrics fm) {
+                                   List<Shape> usedIconAreas, List<Shape> usedLabelAreas, FontMetrics fm, Color shadowColor, Color fillColor) {
         int textWidth = fm.stringWidth(label);
         int textHeight = fm.getHeight();
 
@@ -252,20 +262,20 @@ public class LabelRenderer {
             boolean overlapsLabel = usedLabelAreas.stream().anyMatch(r -> r.intersects(labelBox));
 
             if (!overlapsIcon && !overlapsLabel) {
-                drawLabel(g, label, centerX + offset[0], ty, fm);
+                drawLabel(g, label, centerX + offset[0], ty, fm, shadowColor, fillColor);
                 usedLabelAreas.add(labelBox);
                 return;
             }
         }
     }
 
-    private void drawLabel(Graphics2D g, String label, int centerX, int baselineY, FontMetrics metrics) {
+    private void drawLabel(Graphics2D g, String label, int centerX, int baselineY, FontMetrics metrics, Color shadowColor, Color fillColor) {
         int textX = centerX - metrics.stringWidth(label) / 2;
         int textY = baselineY;
 
-        g.setColor(Color.BLACK);
+        g.setColor(shadowColor);
         g.drawString(label, textX + 1, textY + 1); // Shadow
-        g.setColor(Color.WHITE);
+        g.setColor(fillColor);
         g.drawString(label, textX, textY);         // Foreground
     }
 

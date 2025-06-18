@@ -35,6 +35,7 @@ public class MapRenderer {
     private final List<DrawableFeature> drawableFeatures;
     private final List<IconDrawInfo> iconDrawList = new ArrayList<>();
     private final List<IconDrawInfo> labelOnlyList = new ArrayList<>();
+    private final List<IconDrawInfo> waterLabelList = new ArrayList<>();
     private final List<DomainFeature> streetFeatureList = new ArrayList<>();
 
     public MapRenderer(Geometry targetSquare,
@@ -95,7 +96,8 @@ public class MapRenderer {
 
         // Draw icons and all labels
         labelRenderer.drawIconsAndLabels(iconDrawList, fm, usedIconAreas, usedLabelAreas);
-        labelRenderer.drawLabels(labelOnlyList ,usedIconAreas, usedLabelAreas, fm);
+        labelRenderer.drawNormalLabels(labelOnlyList ,usedIconAreas, usedLabelAreas, fm);
+        labelRenderer.drawWaterLabels(waterLabelList ,usedIconAreas, usedLabelAreas, fm);
         labelRenderer.drawStreetLabels(g, fm, streetFeatureList, usedIconAreas ,usedLabelAreas);
     }
 
@@ -176,6 +178,14 @@ public class MapRenderer {
                 }
                 else
                     addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0.0001);
+
+
+            if (!feature.realname().contains("WATER") && !feature.realname().contains("FLUSS")){  // Dont add water names that are just useless
+                Coordinate center = feature.geometry().getInteriorPoint().getCoordinate();
+                int labelX = toPixelX(center.x);
+                int labelY = toPixelY(center.y);
+                waterLabelList.add(new IconDrawInfo(null, labelX, labelY, 0, 0, feature.realname()));
+            }
         }
     }
 
@@ -296,8 +306,16 @@ public class MapRenderer {
 
         // Draw remaning geoms not in the list
         for (DomainFeature feature : otherGeoms) {
-            if(!feature.realname().contains("Landschaftsschutzgebiet Wöhrder See"))
+            if(!feature.realname().contains("Landschaftsschutzgebiet Wöhrder See"))  // TODO remove wöhrder see
                 addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0);
+
+            // Add zoo things to labelOnlyList
+            if(feature.lsiclass1() == 93140000 && feature.tags().contains("attraction=animal") && !feature.realname().equals("Leer")){
+                Coordinate center = feature.geometry().getCentroid().getCoordinate();
+                int labelX = toPixelX(center.x);
+                int labelY = toPixelY(center.y);
+                labelOnlyList.add(new IconDrawInfo(null, labelX, labelY, 0, 0, feature.realname()));
+            }
         }
     }
 
@@ -368,14 +386,6 @@ public class MapRenderer {
                     "icons/" + displayInfo.icon() + ".png",
                     iconX, iconY, iconSize, iconSize, label
             ));
-        }
-
-        // Add zoo things to labelOnlyList
-        if(feature.lsiclass1() == 93140000 && feature.tags().contains("attraction=animal") && !feature.realname().equals("Leer")){
-            Coordinate center = feature.geometry().getCentroid().getCoordinate();
-            int labelX = toPixelX(center.x);
-            int labelY = toPixelY(center.y);
-            labelOnlyList.add(new IconDrawInfo(null, labelX, labelY, 0, 0, feature.realname()));
         }
     }
 
