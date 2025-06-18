@@ -6,8 +6,7 @@ set PACKAGE=stan
 set JARFILE=%PACKAGE%.jar
 set SRC_DIR=src\%PACKAGE%
 set OUT_DIR=out
-set LIB_DIR=lib
-set LIB_JAR=%LIB_DIR%\geo.jar
+set LIB_JAR=geo.jar
 
 :: --- 1. Ausgabeordner leeren ---
 if exist %OUT_DIR% rmdir /s /q %OUT_DIR%
@@ -28,9 +27,9 @@ xcopy /s /y %SRC_DIR% %OUT_DIR%\%PACKAGE%\ >nul
 :: --- 4. JAR-Datei bauen ---
 echo [INFO] Erstelle JAR-Datei...
 if exist %JARFILE% del %JARFILE%
-jar cf %JARFILE% -C %OUT_DIR% .
+jar cf %JARFILE% -C %OUT_DIR% %PACKAGE%
 
-echo [SUCCESS] Fertig! -> %JARFILE%
+echo [SUCCESS] Fertig! %JARFILE%
 
 endlocal
 pause

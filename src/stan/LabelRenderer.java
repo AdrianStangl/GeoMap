@@ -190,9 +190,9 @@ public class LabelRenderer {
 
                     int textWidth = fm.stringWidth(label);
                     int textAscent = fm.getAscent();
-                    int textHeight = fm.getHeight(); // used for the full bounding box if needed
+                    int textHeight = fm.getHeight(); // Used for the full bounding box if needed
 
-                    int labelPadding = iconSize / 2;  // use icon size divided by factor as padding (found experimentally)
+                    int labelPadding = (int) (iconSize * 0.8);  // Use icon size divided by factor as padding (found experimentally)
                     int labelX = x + iconW / 2;
                     int labelY = y + iconH + labelPadding;
 

@@ -49,6 +49,8 @@ public class LsiIconLabelMap {
             return new IconDisplayInfo("nightlife", true); // Fun stuff
         } else if (lsiClass >= 20920000 && lsiClass <= 20922000) {
             return new IconDisplayInfo("museum", true); // Museum stuff
+        } else if (lsiClass == 93310000) {
+            return new IconDisplayInfo("castle", true); // Museum stuff
         }
         return null;
     }

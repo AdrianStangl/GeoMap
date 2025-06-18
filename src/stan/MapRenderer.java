@@ -111,7 +111,7 @@ public class MapRenderer {
     private int computeIconSize(int scaleMeters) {
         double scaleFactor = Math.log10(scaleMeters);
 
-        int size = (int) (scaleFactor * 10);
+        int size = (int) (scaleFactor * 7);
         return Math.max(12, Math.min(size, 32));
     }
 
