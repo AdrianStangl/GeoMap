@@ -1,3 +1,5 @@
+package stan;
+
 import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;

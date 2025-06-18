@@ -1,3 +1,5 @@
+package stan;
+
 public class LSIClassGroups {
 
     public static final String[] RESIDENTIAL = {

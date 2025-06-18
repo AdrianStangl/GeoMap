@@ -1,3 +1,5 @@
+package stan;
+
 public class LsiIconLabelMap {
 
     public static IconDisplayInfo getIconDisplayInfo(int lsiClass) {

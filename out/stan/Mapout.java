@@ -1,3 +1,5 @@
+package stan;
+
 import fu.keys.LSIClassCentreDB;
 import fu.util.DBUtil;
 
