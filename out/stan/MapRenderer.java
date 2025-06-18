@@ -292,6 +292,16 @@ public class MapRenderer {
         List<DomainFeature> otherGeoms = fetcher.getFeaturesByLsiClass(connection, "OTHER_OBJECTS", null, false);
         Color fillColor = new Color(227, 91, 91, 221);
         Color borderColor = new Color(214, 96, 109, 216);
+        
+        for(DomainFeature feature : otherGeoms){
+            // Add zoo things to labelOnlyList
+            if(feature.lsiclass1() == 93140000 && feature.tags().contains("attraction=animal") && !feature.realname().equals("Leer")){
+                Coordinate center = feature.geometry().getCentroid().getCoordinate();
+                int labelX = toPixelX(center.x);
+                int labelY = toPixelY(center.y);
+                labelOnlyList.add(new IconDrawInfo(null, labelX, labelY, 0, 0, feature.realname()));
+            }
+        }
 
         for (String lsiClassName : LSIClassGroups.OTHER) {
             drawFeatureSubSet(otherGeoms, lsiClassName, fillColor, borderColor, 0.00002);
@@ -308,14 +318,6 @@ public class MapRenderer {
         for (DomainFeature feature : otherGeoms) {
             if(!feature.realname().contains("Landschaftsschutzgebiet Wöhrder See"))  // TODO remove wöhrder see
                 addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0);
-
-            // Add zoo things to labelOnlyList
-            if(feature.lsiclass1() == 93140000 && feature.tags().contains("attraction=animal") && !feature.realname().equals("Leer")){
-                Coordinate center = feature.geometry().getCentroid().getCoordinate();
-                int labelX = toPixelX(center.x);
-                int labelY = toPixelY(center.y);
-                labelOnlyList.add(new IconDrawInfo(null, labelX, labelY, 0, 0, feature.realname()));
-            }
         }
     }
 
