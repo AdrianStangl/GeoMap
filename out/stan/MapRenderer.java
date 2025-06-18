@@ -180,7 +180,7 @@ public class MapRenderer {
                     addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0.0001);
 
 
-            if (!feature.realname().contains(" WATER ") && !feature.realname().contains(" FLUSS ") && !feature.realname().contains(" SEE ")){  // Dont add water names that are just useless
+            if (!feature.realname().contains("WATER") && !feature.realname().contains("FLUSS") && !feature.realname().contains("SEE")){  // Dont add water names that are just useless (All caps, no special name)
                 Coordinate center = feature.geometry().getInteriorPoint().getCoordinate();
                 int labelX = toPixelX(center.x);
                 int labelY = toPixelY(center.y);
