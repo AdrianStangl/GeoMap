@@ -168,7 +168,6 @@ public class LabelRenderer {
     public void drawWaterLabels(List<IconDrawInfo> waterLabelList, List<Shape> usedIconAreas, List<Shape> usedLabelAreas, FontMetrics fm) {
         Color labelShadow = new Color(90, 140, 200);    // neutral-dunkel
         Color labelFill = new Color(200, 240, 255);    // helles Eisblau
-        System.out.println("there are " + usedLabelAreas.size() + " water label");
         for (IconDrawInfo labelOnly : waterLabelList) {
             String label = cleanRealName(labelOnly.label());
             placeAndDrawLabel(g, label, labelOnly.x(), labelOnly.y(), usedIconAreas, usedLabelAreas, fm, labelShadow, labelFill);
