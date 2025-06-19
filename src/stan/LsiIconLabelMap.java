@@ -1,7 +1,19 @@
 package stan;
 
+/**
+ * Maps LSI class codes to icon display information for labeling map features.
+ * <p>
+ * This class helps determine which icon to display on the map for specific LSI class codes,
+ * along with whether the icon should be labeled (have text next to it).
+ */
 public class LsiIconLabelMap {
 
+    /**
+     * Returns the icon display information (icon name and label flag) for a given LSI class.
+     *
+     * @param lsiClass the LSI classification code
+     * @return the {@link IconDisplayInfo} if the class is mapped, or {@code null} otherwise
+     */
     public static IconDisplayInfo getIconDisplayInfo(int lsiClass) {
         if (lsiClass == 93120000) {
             return new IconDisplayInfo("fontain", true);

@@ -15,7 +15,21 @@ import com.vividsolutions.jts.geom.Polygon;
 import fu.keys.LSIClassCentreDB;
 
 /**
- * Rendert alle Geometrien in ein Bitmap (PNG)
+ * The MapRenderer class renders geographical data onto a bitmap image (PNG format).
+ * It supports various feature types, including water bodies, vegetation, geology,
+ * residential areas, open areas, and other objects, categorized via LSI classes.
+ *
+ * Core Responsibilities:
+ * - Setup the drawing environment using given geometry and size parameters.
+ * - Convert coordinates to pixel positions based on the bounding envelope.
+ * - Retrieve data using a DataFetcher and draw features grouped by type.
+ * - Label features where appropriate (e.g., names for lakes, animal attractions).
+ * - Handle drawing order and label/icon placement to avoid clutter.
+ *
+ * Dependencies:
+ * - Java AWT for drawing.
+ * - JTS Topology Suite for geometrical operations.
+ * - DomainFeature and LSI class utilities for data categorization.
  */
 public class MapRenderer {
     private final BufferedImage image;
@@ -38,6 +52,14 @@ public class MapRenderer {
     private final List<IconDrawInfo> waterLabelList = new ArrayList<>();
     private final List<DomainFeature> streetFeatureList = new ArrayList<>();
 
+    /**
+     * Constructs the renderer.
+     *
+     * @param targetSquare Geometry that defines the geographic bounds of the rendered image.
+     * @param pxWidth Width of the output image in pixels.
+     * @param pxHeight Height of the output image in pixels.
+     * @param meterWidth Real-world width in meters used for scale-dependent icon/font size.
+     */
     public MapRenderer(Geometry targetSquare,
                        int pxWidth, int pxHeight, double meterWidth) throws Exception {
         this.target = targetSquare;
@@ -61,14 +83,19 @@ public class MapRenderer {
         this.labelRenderer = new LabelRenderer(g, iconSize, globalFontsize, width, height, target);
     }
 
+    /** Converts longitude to image pixel X. */
     private int toPixelX(double lon) {
         return (int) Math.round((lon - env.getMinX()) * scaleX);
     }
+    /** Converts latitude to image pixel Y. */
     private int toPixelY(double lat) {
         return height - (int) Math.round((lat - env.getMinY()) * scaleY);
     }
 
-    /// Draws the map
+    /**
+     * Draws the full map using the provided database connection and data fetcher.
+     * Includes water, geology, vegetation, residential areas, open areas, and others.
+     */
     public void drawMap(Connection connection, DataFetcher fetcher) throws Exception {
         drawBackground();
         drawWater(connection, fetcher);
@@ -101,7 +128,7 @@ public class MapRenderer {
         labelRenderer.drawStreetLabels(g, fm, streetFeatureList, usedIconAreas ,usedLabelAreas);
     }
 
-    /// Calculate font size depending on map width
+    /** Computes font size based on real-world width (in meters). */
     private int computeFontSizeForScale(int meters) {
         double scaleFactor = Math.log10(meters);
 
@@ -109,7 +136,7 @@ public class MapRenderer {
         return Math.max(8, Math.min(fontSize, 30));
     }
 
-    /// Calculate icon size depending on map width
+    /** Computes icon size based on real-world width (in meters). */
     private int computeIconSize(int scaleMeters) {
         double scaleFactor = Math.log10(scaleMeters);
 
@@ -117,7 +144,7 @@ public class MapRenderer {
         return Math.max(12, Math.min(size, 32));
     }
 
-    /// Draws the given polygon with fill and border color
+    /** Draws a given geometry as a filled polygon with a border. */
     public void drawPolygon(Geometry geom, Color fillColor, Color borderColor) {
         Path2D path = new Path2D.Double();
         boolean first = true;
@@ -138,7 +165,7 @@ public class MapRenderer {
         g.draw(path);
     }
 
-    /// Draws the given line with its bordercolor
+    /** Draws a geometry as a line using the given color. */
     public void drawLineGeometry(Geometry geom, Color borderColor) {
         Path2D path = new Path2D.Double();
         boolean first = true;
@@ -152,14 +179,14 @@ public class MapRenderer {
         g.draw(path);
     }
 
-    /// Draws a colored background square the size of the image
+    /** Draws a solid background over the full image. */
     public void drawBackground() {
         Color backgroundColor = new Color(66, 76, 71, 181);
 
         drawPolygon(target, backgroundColor, backgroundColor);
     }
 
-    /// Draw all lsi classes related to water
+    /** Draws water bodies and labels them appropriately. */
     public void drawWater(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> waterGeoms = fetcher.getFeaturesByLsiClass(connection, "WATER", null, false);
         List<DomainFeature> protectGeoms = fetcher.getFeaturesByLsiClass(connection, "SCHUTZGEBIET", null, false);
@@ -189,7 +216,7 @@ public class MapRenderer {
         }
     }
 
-    /// Draw all lsi classes related to vegetation
+    /** Draws vegetation-related geometries. */
     public void drawVegetation(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> vegetationGeoms = fetcher.getFeaturesByLsiClass(connection, "VEGETATION", null, false);
 
@@ -205,7 +232,7 @@ public class MapRenderer {
         }
     }
 
-    /// Draw all lsi classes related to residential areas
+    /** Draws inhabited/residential area geometries. */
     public void drawResidential(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> residentialGeoms = fetcher.getFeaturesByLsiClass(connection, "INHABITED", null, false);
         Color fillColor = new Color(149, 6, 49, 180);
@@ -221,7 +248,7 @@ public class MapRenderer {
         }
     }
 
-    /// Draw all lsi classes related to open areas
+    /** Draws open area geometries such as tracks, tram lines, stations, and streets. */
     public void drawOpenarea(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> openareaGeoms = fetcher.getFeaturesByLsiClass(connection, "OPENAREA", null, false);
         Color fillColor = new Color(237, 222, 107, 255);  // Cornflower Blue, semi-transparent
@@ -259,24 +286,7 @@ public class MapRenderer {
         }
     }
 
-    private void drawFeatureSubSet(List<DomainFeature> featureSet, String lsiClassName, Color fillColor, Color borderColor, double buffer){
-        int[] lsiBoundaries = LSIClassCentreDB.lsiClassRange(lsiClassName);
-        LsiColorMap.ColorPair colorPair = LsiColorMap.getColor(lsiClassName);
-        if (colorPair.fill().equals(new Color(200, 200, 200, 180))){
-            System.out.println("Use default fill color for class: " + lsiClassName);
-            drawFeatureSubSet(featureSet, lsiBoundaries[0], lsiBoundaries[1], fillColor, borderColor, buffer);
-        } else
-            drawFeatureSubSet(featureSet, lsiBoundaries[0], lsiBoundaries[1], colorPair.fill(), colorPair.stroke(), buffer);
-    }
-
-    private void drawFeatureSubSet(List<DomainFeature> featureSet, int lowerLSIUpper, int upperLSIBorder, Color fillColor, Color borderColor, double buffer) {
-        List<DomainFeature> subsetGeos = extractLSISubSet(featureSet, lowerLSIUpper, upperLSIBorder);
-        for (DomainFeature feature : subsetGeos) {
-            addDomainFeatureToGlobalList(feature, fillColor, borderColor, buffer);
-        }
-    }
-
-    /// Draw all lsi classes related to Geology
+    /** Draws geology-related geometries. */
     public void drawGeology(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> openareaGeoms = fetcher.getFeaturesByLsiClass(connection, "GEOLOGY", null, false);
         Color fillColor = new Color(95, 103, 112, 255);  // Cornflower Blue, semi-transparent
@@ -287,12 +297,12 @@ public class MapRenderer {
         }
     }
 
-    /// Draw all lsi classes related to other geometries
+    /** Draws various miscellaneous geometries and labels zoo attractions. */
     public void drawOthers(Connection connection, DataFetcher fetcher) throws Exception {
         List<DomainFeature> otherGeoms = fetcher.getFeaturesByLsiClass(connection, "OTHER_OBJECTS", null, false);
         Color fillColor = new Color(227, 91, 91, 221);
         Color borderColor = new Color(214, 96, 109, 216);
-        
+
         for(DomainFeature feature : otherGeoms){
             // Add zoo things to labelOnlyList
             if(feature.lsiclass1() == 93140000 && feature.tags().contains("attraction=animal") && !feature.realname().equals("Leer")){
@@ -321,7 +331,30 @@ public class MapRenderer {
         }
     }
 
-    /// Draws the streets and populates the streets to be labeled
+    /** Draws a subset of features defined by an LSI class name. */
+    private void drawFeatureSubSet(List<DomainFeature> featureSet, String lsiClassName, Color fillColor, Color borderColor, double buffer){
+        int[] lsiBoundaries = LSIClassCentreDB.lsiClassRange(lsiClassName);
+        LsiColorMap.ColorPair colorPair = LsiColorMap.getColor(lsiClassName);
+        if (colorPair.fill().equals(new Color(200, 200, 200, 180))){
+            System.out.println("Use default fill color for class: " + lsiClassName);
+            drawFeatureSubSet(featureSet, lsiBoundaries[0], lsiBoundaries[1], fillColor, borderColor, buffer);
+        } else
+            drawFeatureSubSet(featureSet, lsiBoundaries[0], lsiBoundaries[1], colorPair.fill(), colorPair.stroke(), buffer);
+    }
+
+    /** Draws a subset of features defined by numeric LSI class bounds. */
+    private void drawFeatureSubSet(List<DomainFeature> featureSet, int lowerLSIUpper, int upperLSIBorder, Color fillColor, Color borderColor, double buffer) {
+        List<DomainFeature> subsetGeos = extractLSISubSet(featureSet, lowerLSIUpper, upperLSIBorder);
+        for (DomainFeature feature : subsetGeos) {
+            addDomainFeatureToGlobalList(feature, fillColor, borderColor, buffer);
+        }
+    }
+
+    /**
+     * Draws street geometries with appropriate styling and prepares them for labeling.
+     * <p>
+     * @param streetGeoms List of street features to be processed and drawn.
+     */
     public void drawStreets(List<DomainFeature> streetGeoms) {
         // List for all the streets that should get labels
         List<DomainFeature> labelstreetGeomList = new ArrayList<>();
@@ -346,7 +379,17 @@ public class MapRenderer {
             addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0.00003);
     }
 
-    /// Draws a domain feature with its fill and border color, lines and points get buffered if a buffer value is provided
+    /**
+     * Draws a domain feature with a given fill and border color.
+     * <p>
+     * Handles multiple geometry types: polygons, lines, and points. Adds buffered representations
+     * where appropriate and draws icons and/or labels based on LSI class metadata.
+     *
+     * @param feature     The feature to be drawn.
+     * @param fillColor   Fill color for polygons or buffered features.
+     * @param borderColor Stroke color for lines and polygon borders.
+     * @param buffer      Buffer value in degrees; used to inflate lines and points for visibility.
+     */
     private void drawDomainFeature(DomainFeature feature, Color fillColor, Color borderColor, double buffer){
         if(feature.geometry() instanceof Polygon)
             drawPolygon(feature.geometry(), fillColor, borderColor);
@@ -391,18 +434,40 @@ public class MapRenderer {
         }
     }
 
-
+    /**
+     * Adds a domain feature with styling to the global drawable feature list.
+     *
+     * @param feature     The domain feature to add.
+     * @param fillColor   Fill color used for rendering.
+     * @param borderColor Border color used for rendering.
+     * @param buffer      Optional buffer used to inflate geometries.
+     */
     private void addDomainFeatureToGlobalList(DomainFeature feature, Color fillColor, Color borderColor, double buffer){
         drawableFeatures.add(new DrawableFeature(feature,fillColor,borderColor, buffer));
     }
 
+    /**
+     * Extracts features from a list that fall within the LSI class range associated with a given class name.
+     *
+     * @param features      The list of features to filter.
+     * @param lsiClassName  LSI class name used to get the numeric class range.
+     * @return A list of features matching the specified class range.
+     */
     private List<DomainFeature> extractLSISubSet(List<DomainFeature> features, String lsiClassName){
         int[] classRange = LSIClassCentreDB.lsiClassRange(lsiClassName);
         return extractLSISubSet(features, classRange[0], classRange[1]);
     }
 
-    /// Returns subset of features list where the features are between lowerBound and upperBound, including the borders
-    /// Removes the extracted features from the original list
+    /**
+     * Extracts and removes features from the input list whose LSI class values fall within a given numeric range.
+     * <p>
+     * It checks `lsiclass1`, `lsiclass2`, and `lsiclass3` and removes matching features in-place.
+     *
+     * @param features    The input list of features (will be modified).
+     * @param lowerBound  Lower bound of the LSI class range (inclusive).
+     * @param upperBound  Upper bound of the LSI class range (inclusive).
+     * @return A list of features that fall within the specified range.
+     */
     private List<DomainFeature> extractLSISubSet(List<DomainFeature> features, int lowerBound, int upperBound) {
         List<DomainFeature> subset = new ArrayList<>();
         for (int i = 0; i < features.size(); i++) {
@@ -421,7 +486,10 @@ public class MapRenderer {
     }
 
     /**
-     * Speichert das gerenderte Bild als PNG
+     * Saves the rendered map image to a PNG file.
+     *
+     * @param filename The filename (including path) where the PNG image should be saved.
+     * @throws Exception If writing the file fails.
      */
     public void saveImage(String filename) throws Exception {
         ImageIO.write(image, "PNG", new File(filename));

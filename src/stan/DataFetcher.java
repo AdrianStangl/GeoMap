@@ -26,11 +26,13 @@ public class DataFetcher {
                 meterWidth);
     }
 
+    /// Calculates the square area with center point of the lat, lon coordinates and a width of widthMeters
+    /// Only accurate for the region of nuernberg
     private static Geometry calculateTargetSquare(double lat, double lon,
                                                   int wPx, int hPx,
                                                   double widthMeters) {
 
-        // Approximate scale factors für Nürnberg:
+        // Approximate scale factors für Nuernberg:
         // 1 Grad Länge ~ 72.300 m
         // 1 Grad Breite ~ 111.320 m
         final double metersPerDegLon = 72300;
@@ -82,6 +84,8 @@ public class DataFetcher {
         return getFeaturesByLsiClass(conn, lsiLower, lsiUpper, geometryType, false);
     }
 
+    ///  Returns a list of domainfeatures that are within the target square and between the lsi boundaries
+    /// Optionally historic entries can be ignored with a flag
     public List<DomainFeature> getFeaturesByLsiClass(Connection conn, int lsiLower, int lsiUpper, String geometryType, boolean excludeHistoric) throws Exception {
         List<DomainFeature> features = new ArrayList<>();
         System.out.println("Fetching from " + lsiLower + " to " + lsiUpper);

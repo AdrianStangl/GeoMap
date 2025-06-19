@@ -1,5 +1,6 @@
 package stan;
 
+///  Provides lists of the lsi classes that should be drawn
 public class LSIClassGroups {
 
     public static final String[] RESIDENTIAL = {
