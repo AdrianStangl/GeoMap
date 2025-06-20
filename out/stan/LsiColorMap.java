@@ -4,8 +4,22 @@ import java.awt.Color;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A centralized map that associates LSI class names with custom fill and stroke colors.
+ *
+ * <p>Used to style map features based on LSI classification, such as residential,
+ * industrial, educational, and water-related areas. Colors are semi-transparent and
+ * carefully chosen for aesthetic distinction.</p>
+ */
 // Note: Colors have been AI generated with a lot of pain and suffering
 public class LsiColorMap {
+    /**
+     * Represents a pair of colors: one for fill and one for stroke.
+     * Used to differentiate feature interiors and borders.
+     *
+     * @param fill   the fill color (e.g., interior of a polygon)
+     * @param stroke the stroke color (e.g., polygon border)
+     */
     public record ColorPair(Color fill, Color stroke) {}
 
     private static final Map<String, ColorPair> colorMap = new HashMap<>();
@@ -281,6 +295,12 @@ public class LsiColorMap {
 
     }
 
+    /**
+     * Returns the color pair associated with the given LSI class.
+     *
+     * @param lsiClass the LSI class name
+     * @return the {@link ColorPair} for the class, or {@code null} if not defined
+     */
     public static ColorPair getColor(String key) {
         return colorMap.getOrDefault(key, new ColorPair(new Color(200,200,200,180), new Color(150,150,150,200)));
     }

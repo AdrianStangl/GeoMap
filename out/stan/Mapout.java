@@ -5,7 +5,28 @@ import fu.util.DBUtil;
 
 import java.sql.Connection;
 
+/**
+ * Entry point for rendering a map image based on specified geographic and rendering parameters.
+ * <p>
+ * This class connects to the LSI database, fetches relevant spatial data, and delegates rendering
+ * to the {@link MapRenderer} using the {@link DataFetcher}.
+ */
 public class Mapout {
+    /**
+     * Main method for running the map rendering pipeline.
+     * <p>
+     * Required command-line arguments:
+     * <ol>
+     *   <li>Latitude of map center (double)</li>
+     *   <li>Longitude of map center (double)</li>
+     *   <li>Image width in pixels (int)</li>
+     *   <li>Image height in pixels (int)</li>
+     *   <li>Map width in meters (double)</li>
+     *   <li>Output file path (String)</li>
+     * </ol>
+     *
+     * @param args command line arguments as described above
+     */
     public static void main(String[] args) {
         Connection connection = null;
 
@@ -46,6 +67,18 @@ public class Mapout {
         }
     }
 
+    /**
+     * Rendering of a map image based on the provided parameters.
+     *
+     * @param connection  active database connection
+     * @param centerLat   latitude of map center
+     * @param centerLon   longitude of map center
+     * @param pxWidth     width of the output image in pixels
+     * @param pxHeight    height of the output image in pixels
+     * @param meterWidth  width of the map area in meters
+     * @param outputFile  file path to save the rendered image
+     * @throws Exception if rendering or data fetching fails
+     */
     private static void drawMapForParameters(Connection connection, double centerLat, double centerLon, int pxWidth, int pxHeight, double meterWidth, String outputFile) throws Exception {
         DataFetcher fetcher = new DataFetcher(centerLat, centerLon,
                 pxWidth, pxHeight,

@@ -147,7 +147,7 @@ public class LabelRenderer {
             Point2D baseLabelPos = computeMidpoint(coords);
             double angle = computeLocalAngle(coords);
 
-            // Prüfen, ob zu nah an bestehenden Labels mit gleichem Namen
+            // Check for labels in close proximity
             boolean tooClose = labelPositions
                     .getOrDefault(road.realname(), List.of())
                     .stream().anyMatch(p -> p.distance(baseLabelPos) < labelMinDistance);

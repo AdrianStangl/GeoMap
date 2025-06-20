@@ -26,11 +26,13 @@ public class DataFetcher {
                 meterWidth);
     }
 
+    /// Calculates the square area with center point of the lat, lon coordinates and a width of widthMeters
+    /// Only accurate for the region of nuernberg
     private static Geometry calculateTargetSquare(double lat, double lon,
                                                   int wPx, int hPx,
                                                   double widthMeters) {
 
-        // Approximate scale factors für Nürnberg:
+        // Approximate scale factors für Nuernberg:
         // 1 Grad Länge ~ 72.300 m
         // 1 Grad Breite ~ 111.320 m
         final double metersPerDegLon = 72300;
@@ -82,12 +84,14 @@ public class DataFetcher {
         return getFeaturesByLsiClass(conn, lsiLower, lsiUpper, geometryType, false);
     }
 
+    ///  Returns a list of domainfeatures that are within the target square and between the lsi boundaries
+    /// Optionally historic entries can be ignored with a flag
     public List<DomainFeature> getFeaturesByLsiClass(Connection conn, int lsiLower, int lsiUpper, String geometryType, boolean excludeHistoric) throws Exception {
         List<DomainFeature> features = new ArrayList<>();
         System.out.println("Fetching from " + lsiLower + " to " + lsiUpper);
 
         StringBuilder sql = new StringBuilder("""
-            SELECT realname, lsiclass1, lsiclass2, lsiclass3, ST_AsEWKB(geom :: geometry) AS geom, geometry, ST_Area(geom :: geometry) AS area, tags
+            SELECT d_id AS id, realname, lsiclass1, lsiclass2, lsiclass3, ST_AsEWKB(geom :: geometry) AS geom, geometry, ST_Area(geom :: geometry) AS area, tags
             FROM domain
             WHERE ST_Intersects(geom :: geometry, ST_GeomFromWKB(?, 4326))
               AND (lsiclass1 BETWEEN ? AND ? or lsiclass2 BETWEEN ? AND ? or lsiclass3 BETWEEN ? AND ?)
@@ -123,6 +127,7 @@ public class DataFetcher {
             try (ResultSet rs = ps.executeQuery()) {
                 WKBReader reader = new WKBReader();
                 while (rs.next()) {
+                    int id = rs.getInt("id");
                     String realname = rs.getString("realname");
                     int lsiclass1 = rs.getInt("lsiclass1");
                     int lsiclass2 = rs.getInt("lsiclass2");
@@ -131,7 +136,7 @@ public class DataFetcher {
                     String geometryDataType = rs.getString("geometry");
                     double area = rs.getDouble("area");
                     String tags = rs.getString("tags");
-                    features.add(new DomainFeature(realname, lsiclass1, lsiclass2, lsiclass3, geom, geometryDataType, area, tags));
+                    features.add(new DomainFeature(id, realname, lsiclass1, lsiclass2, lsiclass3, geom, geometryDataType, area, tags));
                 }
             }
         }

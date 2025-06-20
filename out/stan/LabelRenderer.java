@@ -14,6 +14,13 @@ import java.util.List;
 
 import com.vividsolutions.jts.geom.*;
 
+/**
+ * The {@code LabelRenderer} class is responsible for rendering labels and icons on a 2D map using a {@link Graphics2D} context.
+ * It includes support for rotated labels (e.g., along roads), icon-label pairs, and collision-aware label placement.
+ *
+ * It works in conjunction with geometry data provided by JTS and draws elements using screen coordinates calculated
+ * from a given bounding envelope.
+ */
 public class LabelRenderer {
     private final Graphics2D g;
     private final int iconSize;
@@ -23,6 +30,16 @@ public class LabelRenderer {
     private final Geometry target;
     private final Envelope env;
 
+    /**
+     * Constructs a {@code LabelRenderer} to draw onto a graphics context with given map size and projection bounds.
+     *
+     * @param g              the {@link Graphics2D} context to draw on
+     * @param iconSize       default icon size (used for spacing)
+     * @param globalFontSize global font size (used for label text)
+     * @param width          width of the drawing area
+     * @param height         height of the drawing area
+     * @param target         a geometry representing the full area to be rendered; used to compute pixel scaling
+     */
     public LabelRenderer(Graphics2D g, int iconSize, int globalFontSize,
                          int width, int height, Geometry target) {
         this.g = g;
@@ -34,14 +51,87 @@ public class LabelRenderer {
         this.env = target.getEnvelopeInternal();
     }
 
+    /**
+     * Converts a longitude value to a pixel X-coordinate.
+     */
     private int toPixelX(double lon) {
         return (int) Math.round((lon - env.getMinX()) * width / (env.getMaxX() - env.getMinX()));
     }
 
+    /**
+     * Converts a latitude value to a pixel Y-coordinate.
+     */
     private int toPixelY(double lat) {
         return height - (int) Math.round((lat - env.getMinY()) * height / (env.getMaxY() - env.getMinY()));
     }
 
+    /**
+     * Attempts to place a label near a specified point (centerX, baselineY),
+     * testing multiple offset positions to avoid overlap with icons and other labels.
+     *
+     * @param g               graphics context
+     * @param label           the text to render
+     * @param centerX         base X coordinate (center of label)
+     * @param baselineY       base Y coordinate (text baseline)
+     * @param usedIconAreas   list of icon bounding boxes to avoid
+     * @param usedLabelAreas  list of label bounding boxes to avoid
+     * @param fm              font metrics for label size
+     * @param shadowColor     shadow color (usually dark)
+     * @param fillColor       foreground text color
+     */
+    public void placeAndDrawLabel(Graphics2D g, String label, int centerX, int baselineY,
+                                  List<Shape> usedIconAreas, List<Shape> usedLabelAreas, FontMetrics fm, Color shadowColor, Color fillColor) {
+        int textWidth = fm.stringWidth(label);
+        int textHeight = fm.getHeight();
+
+        int[][] offsets = {
+                {0, 0},                             // below
+                {0, -textHeight - 4},              // above
+                {-textWidth / 2 - 5, 0},               // left
+                {textWidth/ 2 + 5, 0},                // right
+                {-textWidth / 2, textHeight / 2 + 4},  // bottom-left
+                {textWidth / 2, textHeight / 2 + 4},   // bottom-right
+        };
+
+        for (int[] offset : offsets) {
+            int tx = centerX + offset[0] - textWidth / 2;
+            int ty = baselineY + offset[1];
+            Rectangle labelBox = new Rectangle(tx, ty - textHeight, textWidth, textHeight);
+
+            boolean overlapsIcon = usedIconAreas.stream().anyMatch(r -> r.intersects(labelBox));
+            boolean overlapsLabel = usedLabelAreas.stream().anyMatch(r -> r.intersects(labelBox));
+
+            if (!overlapsIcon && !overlapsLabel) {
+                drawLabel(g, label, centerX + offset[0], ty, fm, shadowColor, fillColor);
+                usedLabelAreas.add(labelBox);
+                return;
+            }
+        }
+    }
+
+    /**
+     * Draws a label centered horizontally at a given baseline Y-coordinate.
+     */
+    private void drawLabel(Graphics2D g, String label, int centerX, int baselineY, FontMetrics metrics, Color shadowColor, Color fillColor) {
+        int textX = centerX - metrics.stringWidth(label) / 2;
+        int textY = baselineY;
+
+        g.setColor(shadowColor);
+        g.drawString(label, textX + 1, textY + 1); // Shadow
+        g.setColor(fillColor);
+        g.drawString(label, textX, textY);         // Foreground
+    }
+
+    /**
+     * Draws road/street names along their center lines, rotated to match the street direction.
+     * Labels are only drawn if not too close to other labels of the same name.
+     *
+     * @param g2d             graphics context
+     * @param fm              font metrics
+     * @param streetFeatureList list of street features to label
+     * @param usedIconAreas   bounding boxes of existing icons
+     * @param usedLabelAreas  bounding boxes of existing labels
+     */
     public void drawStreetLabels(Graphics2D g2d, FontMetrics fm, List<DomainFeature> streetFeatureList, List<Shape> usedIconAreas, List<Shape> usedLabelAreas) {
         System.out.println("Drawing Street Labels, this may take a while...");
         double labelMinDistance = 200.0;
@@ -57,7 +147,7 @@ public class LabelRenderer {
             Point2D baseLabelPos = computeMidpoint(coords);
             double angle = computeLocalAngle(coords);
 
-            // Prüfen, ob zu nah an bestehenden Labels mit gleichem Namen
+            // Check for labels in close proximity
             boolean tooClose = labelPositions
                     .getOrDefault(road.realname(), List.of())
                     .stream().anyMatch(p -> p.distance(baseLabelPos) < labelMinDistance);
@@ -97,11 +187,21 @@ public class LabelRenderer {
         }
     }
 
+    /**
+     * Computes the midpoint (in pixel space) of a line geometry.
+     *
+     * @param coords array of line coordinates
+     * @return midpoint in screen coordinates
+     */
     private Point2D computeMidpoint(Coordinate[] coords) {
         int mid = coords.length / 2;
         return new Point2D.Double(toPixelX(coords[mid].x), toPixelY(coords[mid].y));
     }
 
+    /**
+     * Computes the angle in radians representing the orientation of a line segment near the center of a geometry.
+     * The angle is adjusted to ensure text is not upside down.
+     */
     private double computeLocalAngle(Coordinate[] coords) {
         int mid = coords.length / 2;
         int idx1 = Math.max(0, mid - 1);
@@ -126,6 +226,14 @@ public class LabelRenderer {
         return angle;
     }
 
+    /**
+     * Draws a rotated label at a specified position and angle.
+     *
+     * @param g2d      graphics context
+     * @param text     label text
+     * @param position screen coordinate position
+     * @param angle    angle in radians to rotate the text
+     */
     public void drawRotatedLabel(Graphics2D g2d, String text, Point2D position, double angle) {
         AffineTransform old = g2d.getTransform();
 
@@ -143,6 +251,16 @@ public class LabelRenderer {
         g2d.setTransform(old);
     }
 
+    /**
+     * Creates a {@link Shape} representing the area covered by a rotated label.
+     * Used for collision detection with other labels and icons.
+     *
+     * @param text  label text
+     * @param pos   label center position
+     * @param angle rotation angle in radians
+     * @param g2d   graphics context (for font metrics)
+     * @return transformed shape representing the rotated text
+     */
     public Shape createRotatedLabelShape(String text, Point2D pos, double angle, Graphics2D g2d) {
         FontRenderContext frc = g2d.getFontRenderContext();
         TextLayout layout = new TextLayout(text, g2d.getFont(), frc);
@@ -156,7 +274,14 @@ public class LabelRenderer {
         return transform.createTransformedShape(textShape);
     }
 
-
+    /**
+     * Draws labels that are not associated with icons. Useful for standalone features like landmarks or named areas.
+     *
+     * @param labelOnlyList   list of label-only items
+     * @param usedIconAreas   icon bounding boxes to avoid
+     * @param usedLabelAreas  label bounding boxes to avoid
+     * @param fm              font metrics
+     */
     public void drawNormalLabels(List<IconDrawInfo> labelOnlyList, List<Shape> usedIconAreas, List<Shape> usedLabelAreas, FontMetrics fm) {
         // Handle label-only entries
         for (IconDrawInfo labelOnly : labelOnlyList) {
@@ -165,6 +290,14 @@ public class LabelRenderer {
         }
     }
 
+    /**
+     * Draws water-related labels with specific colors. Intended for use with lakes, rivers, etc.
+     *
+     * @param waterLabelList  list of water-related label items
+     * @param usedIconAreas   icon bounding boxes to avoid
+     * @param usedLabelAreas  label bounding boxes to avoid
+     * @param fm              font metrics
+     */
     public void drawWaterLabels(List<IconDrawInfo> waterLabelList, List<Shape> usedIconAreas, List<Shape> usedLabelAreas, FontMetrics fm) {
         Color labelShadow = new Color(90, 140, 200);    // neutral-dunkel
         Color labelFill = new Color(200, 240, 255);    // helles Eisblau
@@ -174,6 +307,15 @@ public class LabelRenderer {
         }
     }
 
+    /**
+     * Draws icons with labels below them, trying multiple small offsets to avoid collisions.
+     * If an icon and label placement is found that does not overlap existing content, it is drawn.
+     *
+     * @param iconDrawList    list of icon draw instructions
+     * @param fm              font metrics
+     * @param usedIconAreas   list of already drawn icons
+     * @param usedLabelAreas  list of already drawn labels
+     */
     public void drawIconsAndLabels(List<IconDrawInfo> iconDrawList, FontMetrics fm, List<Shape> usedIconAreas, List<Shape> usedLabelAreas) {
         for (IconDrawInfo info : iconDrawList) {
             String label = cleanRealName(info.label());
@@ -210,12 +352,6 @@ public class LabelRenderer {
 
                     Rectangle labelBox = new Rectangle(labelBoxX, labelBoxY, textWidth, textHeight);
 
-                    // Debug draw label box
-//                    g.setColor(new Color(150, 150, 150, 50)); // semi-transparent fill
-//                    g.fillRect(labelBox.x, labelBox.y, labelBox.width, labelBox.height);
-//                    g.setColor(Color.DARK_GRAY); // border
-//                    g.drawRect(labelBox.x, labelBox.y, labelBox.width, labelBox.height);
-
                     // Overlap check
                     boolean overlapsIcon = usedIconAreas.stream().anyMatch(r -> r.intersects(iconBox));
                     boolean overlapsLabel = usedLabelAreas.stream().anyMatch(r -> r.intersects(labelBox));
@@ -238,46 +374,12 @@ public class LabelRenderer {
         }
     }
 
-    public void placeAndDrawLabel(Graphics2D g, String label, int centerX, int baselineY,
-                                   List<Shape> usedIconAreas, List<Shape> usedLabelAreas, FontMetrics fm, Color shadowColor, Color fillColor) {
-        int textWidth = fm.stringWidth(label);
-        int textHeight = fm.getHeight();
-
-        int[][] offsets = {
-                {0, 0},                             // below
-                {0, -textHeight - 4},              // above
-                {-textWidth / 2 - 5, 0},               // left
-                {textWidth/ 2 + 5, 0},                // right
-                {-textWidth / 2, textHeight / 2 + 4},  // bottom-left
-                {textWidth / 2, textHeight / 2 + 4},   // bottom-right
-        };
-
-        for (int[] offset : offsets) {
-            int tx = centerX + offset[0] - textWidth / 2;
-            int ty = baselineY + offset[1];
-            Rectangle labelBox = new Rectangle(tx, ty - textHeight, textWidth, textHeight);
-
-            boolean overlapsIcon = usedIconAreas.stream().anyMatch(r -> r.intersects(labelBox));
-            boolean overlapsLabel = usedLabelAreas.stream().anyMatch(r -> r.intersects(labelBox));
-
-            if (!overlapsIcon && !overlapsLabel) {
-                drawLabel(g, label, centerX + offset[0], ty, fm, shadowColor, fillColor);
-                usedLabelAreas.add(labelBox);
-                return;
-            }
-        }
-    }
-
-    private void drawLabel(Graphics2D g, String label, int centerX, int baselineY, FontMetrics metrics, Color shadowColor, Color fillColor) {
-        int textX = centerX - metrics.stringWidth(label) / 2;
-        int textY = baselineY;
-
-        g.setColor(shadowColor);
-        g.drawString(label, textX + 1, textY + 1); // Shadow
-        g.setColor(fillColor);
-        g.drawString(label, textX, textY);         // Foreground
-    }
-
+    /**
+     * Removes suffixes (after underscore) from label names, used to clean up feature names before drawing.
+     *
+     * @param name raw label string
+     * @return cleaned label string
+     */
     private String cleanRealName(String name) {
         int idx = name.indexOf('_');
         return (idx >= 0) ? name.substring(0, idx) : name;

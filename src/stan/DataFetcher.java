@@ -91,7 +91,7 @@ public class DataFetcher {
         System.out.println("Fetching from " + lsiLower + " to " + lsiUpper);
 
         StringBuilder sql = new StringBuilder("""
-            SELECT realname, lsiclass1, lsiclass2, lsiclass3, ST_AsEWKB(geom :: geometry) AS geom, geometry, ST_Area(geom :: geometry) AS area, tags
+            SELECT d_id AS id, realname, lsiclass1, lsiclass2, lsiclass3, ST_AsEWKB(geom :: geometry) AS geom, geometry, ST_Area(geom :: geometry) AS area, tags
             FROM domain
             WHERE ST_Intersects(geom :: geometry, ST_GeomFromWKB(?, 4326))
               AND (lsiclass1 BETWEEN ? AND ? or lsiclass2 BETWEEN ? AND ? or lsiclass3 BETWEEN ? AND ?)
@@ -127,6 +127,7 @@ public class DataFetcher {
             try (ResultSet rs = ps.executeQuery()) {
                 WKBReader reader = new WKBReader();
                 while (rs.next()) {
+                    int id = rs.getInt("id");
                     String realname = rs.getString("realname");
                     int lsiclass1 = rs.getInt("lsiclass1");
                     int lsiclass2 = rs.getInt("lsiclass2");
@@ -135,7 +136,7 @@ public class DataFetcher {
                     String geometryDataType = rs.getString("geometry");
                     double area = rs.getDouble("area");
                     String tags = rs.getString("tags");
-                    features.add(new DomainFeature(realname, lsiclass1, lsiclass2, lsiclass3, geom, geometryDataType, area, tags));
+                    features.add(new DomainFeature(id, realname, lsiclass1, lsiclass2, lsiclass3, geom, geometryDataType, area, tags));
                 }
             }
         }

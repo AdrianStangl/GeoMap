@@ -191,7 +191,7 @@ public class MapRenderer {
         List<DomainFeature> waterGeoms = fetcher.getFeaturesByLsiClass(connection, "WATER", null, false);
         List<DomainFeature> protectGeoms = fetcher.getFeaturesByLsiClass(connection, "SCHUTZGEBIET", null, false);
         for (DomainFeature protectedFeature : protectGeoms)
-            if(protectedFeature.realname().contains("Landschaftsschutzgebiet Wöhrder See"))
+            if(protectedFeature.id() == 414048)
                 waterGeoms.add(protectedFeature);
 
         LsiColorMap.ColorPair colorPair = LsiColorMap.getColor("WATER");
@@ -326,7 +326,7 @@ public class MapRenderer {
 
         // Draw remaning geoms not in the list
         for (DomainFeature feature : otherGeoms) {
-            if(!feature.realname().contains("Landschaftsschutzgebiet Wöhrder See"))  // TODO remove wöhrder see
+            if(feature.id() != 414048)
                 addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0);
         }
     }
