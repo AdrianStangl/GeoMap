@@ -238,6 +238,15 @@ public class MapRenderer {
         Color fillColor = new Color(149, 6, 49, 180);
         Color borderColor = new Color(87, 2, 21, 236);
 
+        for (DomainFeature feature : residentialGeoms) {
+            if(feature.id() == 736068){
+                Coordinate center = feature.geometry().getCentroid().getCoordinate();
+                int labelX = toPixelX(center.x);
+                int labelY = toPixelY(center.y);
+                labelOnlyList.add(new IconDrawInfo(null, labelX, labelY, 0, 0, "Joerg Roth"));
+            }
+        }
+
         for (String lsiClassName : LSIClassGroups.RESIDENTIAL){
             drawFeatureSubSet(residentialGeoms, lsiClassName, fillColor, borderColor, 0.00002);
         }
