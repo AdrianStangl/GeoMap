@@ -153,7 +153,7 @@ public class LabelRenderer {
                     .stream().anyMatch(p -> p.distance(baseLabelPos) < labelMinDistance);
             if (tooClose) continue;
 
-            // Text-Maße berechnen
+            // Text-Masse berechnen
             String label = road.realname();
             int textWidth = fm.stringWidth(label);
             int textHeight = fm.getHeight();

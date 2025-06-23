@@ -200,7 +200,7 @@ public class MapRenderer {
 
         for (DomainFeature feature : waterGeoms) {
             if(!feature.tags().contains("tunnel"))
-                if(feature.tags().toLowerCase().contains("stream")){
+                if(feature.tags().toLowerCase().contains("stream") || feature.tags().toLowerCase().contains("ditch")){
                     addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0.00003);
                 }
                 else
@@ -238,6 +238,7 @@ public class MapRenderer {
         Color fillColor = new Color(149, 6, 49, 180);
         Color borderColor = new Color(87, 2, 21, 236);
 
+        // Extract the most important house of them all
         for (DomainFeature feature : residentialGeoms) {
             if(feature.id() == 736068){
                 Coordinate center = feature.geometry().getCentroid().getCoordinate();

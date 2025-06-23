@@ -200,7 +200,7 @@ public class MapRenderer {
 
         for (DomainFeature feature : waterGeoms) {
             if(!feature.tags().contains("tunnel"))
-                if(feature.tags().toLowerCase().contains("stream")){
+                if(feature.tags().toLowerCase().contains("stream") || feature.tags().toLowerCase().contains("ditch")){
                     addDomainFeatureToGlobalList(feature, fillColor, borderColor, 0.00003);
                 }
                 else
