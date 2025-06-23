@@ -32,13 +32,13 @@ public class DataFetcher {
                                                   int wPx, int hPx,
                                                   double widthMeters) {
 
-        // Approximate scale factors für Nuernberg:
-        // 1 Grad Länge ~ 72.300 m
+        // Approximate scale factors fuer Nuernberg:
+        // 1 Grad Laenge ~ 72.300 m
         // 1 Grad Breite ~ 111.320 m
         final double metersPerDegLon = 72300;
         final double metersPerDegLat = 111320;
 
-        // Halbe Breite und Höhe in Grad berechnen
+        // Halbe Breite und Hoehe in Grad berechnen
         double halfWidthDeg = (widthMeters / 2.0) / metersPerDegLon;
         double heightMeters = widthMeters * ((double) hPx / wPx);
         double halfHeightDeg = (heightMeters / 2.0) / metersPerDegLat;

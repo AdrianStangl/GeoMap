@@ -29,7 +29,7 @@ public class LsiColorMap {
         colorMap.put("WATER", new ColorPair(new Color(70, 130, 180, 255), new Color(25, 90, 140, 255))); // steel blue tones
         colorMap.put("SCHUTZGEBIET", new ColorPair(new Color(70, 130, 180, 255), new Color(25, 90, 140, 255))); // steel blue tones
 
-        // ◼ Gebäude / Wohnen
+        // Gebaeude / Wohnen
         colorMap.put("GEWAECHSHAUS",        new ColorPair(new Color(144, 238, 144, 180), new Color(34, 139, 34, 200)));
         colorMap.put("UNTERSTAND",          new ColorPair(new Color(189, 252, 201, 180), new Color(85, 107, 47, 200)));
         colorMap.put("HUT",                 new ColorPair(new Color(255, 239, 186, 180), new Color(218, 165, 32, 200)));
@@ -52,7 +52,7 @@ public class LsiColorMap {
         colorMap.put("MELDUNGSEINRICHTUNGEN", new ColorPair(new Color(152, 251, 152, 180), new Color(60, 179, 113, 200)));
         colorMap.put("POWER_PLANT",         new ColorPair(new Color(255, 140, 105, 180), new Color(205, 92, 92, 200)));
 
-        // ◼ Akademisch / Bildung
+        // Akademisch / Bildung
         colorMap.put("SCHOOL_BUILDING",     new ColorPair(new Color(240, 230, 140, 180), new Color(189, 183, 107, 200)));
         colorMap.put("GRUNDSCHOOL",         new ColorPair(new Color(255, 250, 205, 180), new Color(238, 232, 170, 200)));
         colorMap.put("BERUFSSCHULE",        new ColorPair(new Color(144, 238, 144, 180), new Color(0, 128, 0, 200)));
@@ -66,7 +66,7 @@ public class LsiColorMap {
         colorMap.put("RESEARCH",            new ColorPair(new Color(255, 239, 213, 180), new Color(255, 160, 122, 200)));
         colorMap.put("LIBRARY",             new ColorPair(new Color(255, 182, 193, 180), new Color(199, 21, 133, 200)));
 
-        // ◼ Routen
+        // Routen
         colorMap.put("ROUTE",               new ColorPair(new Color(200, 230, 255, 180), new Color(150, 190, 240, 200)));
         colorMap.put("ROUTE_TRAIN",         new ColorPair(new Color(180, 210, 255, 180), new Color(130, 170, 240, 200)));
         colorMap.put("ROUTE_TRAM",          new ColorPair(new Color(160, 190, 255, 180), new Color(110, 150, 240, 200)));
@@ -74,7 +74,7 @@ public class LsiColorMap {
         colorMap.put("ROUTE_ROAD",          new ColorPair(new Color(120, 150, 255, 180), new Color( 70, 110, 240, 200)));
         colorMap.put("ROUTE_BICYCLE",       new ColorPair(new Color(100, 130, 255, 180), new Color( 50,  90, 240, 200)));
 
-        // ◼ Wasseraufbereitung & Management
+        // Wasseraufbereitung & Management
         colorMap.put("BRUNNEN",             new ColorPair(new Color(175, 238, 238, 180), new Color(0, 139, 139, 200)));
         colorMap.put("BASIN",               new ColorPair(new Color(0, 191, 255, 180), new Color(0, 0, 139, 200)));
         colorMap.put("RESERVOIR",           new ColorPair(new Color(30, 144, 255, 180), new Color(25, 25, 112, 200)));
@@ -86,7 +86,7 @@ public class LsiColorMap {
         colorMap.put("WASSERAUFBEREITUNG",  new ColorPair(new Color(0, 191, 255, 180), new Color(25, 25, 112, 200)));
         colorMap.put("ROHRLEITUNG",         new ColorPair(new Color(176, 196, 222, 180), new Color(119, 136, 153, 200)));
 
-        // ◼ Energie / Kraftwerk
+        // Energie / Kraftwerk
         colorMap.put("MUEHLE",              new ColorPair(new Color(255, 228, 196, 180), new Color(205, 133,  63, 200)));
         colorMap.put("WASSER_KRAFTWERK",    new ColorPair(new Color(135, 206, 250, 180), new Color( 70, 130, 180, 200)));
         colorMap.put("BRENN_POWER_PLANT",   new ColorPair(new Color(255, 160, 122, 180), new Color(178,  34,  34, 200)));
@@ -106,7 +106,7 @@ public class LsiColorMap {
         colorMap.put("POWER_PLANT_ADDON",   new ColorPair(new Color(255, 228, 225, 180), new Color(240, 128, 128, 200)));
 
 
-        // ◼ Übriges Industrie
+        // uebriges Industrie
         colorMap.put("MINING",              new ColorPair(new Color(205, 133,  63, 180), new Color(160,  82,  45, 200)));
         colorMap.put("INDUSTRIAL",          new ColorPair(new Color(176, 196, 222, 180), new Color(119, 136, 153, 200)));
 
@@ -138,7 +138,7 @@ public class LsiColorMap {
         colorMap.put("WEITERE_DIENSTLEISTUNGEN",    new ColorPair(new Color(240, 255, 240, 180), new Color(211, 211, 211, 200))); // pale green/grey
         colorMap.put("UEBERNACHTUNGEN",             new ColorPair(new Color(255, 239, 213, 180), new Color(210, 180, 140, 200))); // warm/soft beige
 
-        // Behörden
+        // Behoerden
         colorMap.put("BEHOERDE", new ColorPair(new Color(245, 245, 245, 180), new Color(190, 190, 190, 200))); // neutral grey-white
 
         // Medical
@@ -155,7 +155,7 @@ public class LsiColorMap {
         colorMap.put("TIERPARK",              new ColorPair(new Color(204, 255, 204, 180), new Color(152, 251, 152, 200))); // animal green
         colorMap.put("FREIZEIT",              new ColorPair(new Color(255, 228, 225, 180), new Color(255, 160, 122, 200))); // coral fun
 
-        // Ländlich
+        // Laendlich
         colorMap.put("LAENDLICH", new ColorPair(new Color(240, 255, 240, 180), new Color(189, 183, 107, 200))); // field green
 
         // Catch-all commercial
@@ -298,7 +298,6 @@ public class LsiColorMap {
     /**
      * Returns the color pair associated with the given LSI class.
      *
-     * @param lsiClass the LSI class name
      * @return the {@link ColorPair} for the class, or {@code null} if not defined
      */
     public static ColorPair getColor(String key) {
